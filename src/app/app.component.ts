@@ -8,40 +8,4 @@ import { CarService } from './car/car.service';
 })
 export class AppComponent {
   constructor(public car: CarService) { }
-
-  public handleGearboxPositionChange(): void {
-
-  }
-
-  public handleGearboxModeChange(): void {
-
-  }
-
-  public handleGearboxAggressionLevelChange(): void {
-
-  }
-
-  public handleThrottle(): void {
-
-  }
-
-  public handleBrake(): void {
-
-  }
-
-  public handleLeftPaddle(): void {
-    this.car.pushLeftPaddle();
-  }
-
-  public handleRightPaddle(): void {
-    this.car.pushRightPaddle();
-  }
-
-  public connectTrailer(): void {
-
-  }
-
-  public disconnectTrailer(): void {
-
-  }
 }

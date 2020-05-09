@@ -1,13 +1,17 @@
-import { Injectable } from '@angular/core';
-import { Gearbox, GearboxMode } from './gearbox';
+import { Injectable, OnDestroy } from '@angular/core';
+import { Gearbox, GearboxAggressionLevel, GearboxMode, GearboxPosition } from './gearbox';
+import { EngineService } from '../engine/engine.service';
+import { Subscription } from 'rxjs';
+import { filter, tap } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
 })
-export class GearboxService {
+export class GearboxService implements OnDestroy {
   private gearbox: Gearbox;
+  private currentRpmSubscription: Subscription;
 
-  constructor() {
+  constructor(private engine: EngineService) {
     this.gearbox = new Gearbox(
       6,
       {
@@ -57,5 +61,47 @@ export class GearboxService {
         }
       }
     );
+
+    this.currentRpmSubscription = this.engine.currentRpm.pipe(
+      filter(() => this.gearbox.isPositionDrive() && this.gearbox.isModeEco())
+    ).subscribe((rpm: number) => {
+      if (rpm >= this.gearbox.getIncreaseGearRpmLevel() && this.gearbox.increaseGear()) {
+        this.engine.handleGearIncreased();
+        return;
+      }
+
+      if (rpm < this.gearbox.getDecreaseGearRpmLevel() && this.gearbox.decreaseGear()) {
+        this.engine.handleGearDecreased();
+        return;
+      }
+    });
+  }
+
+  public ngOnDestroy() {
+    this.currentRpmSubscription.unsubscribe();
+  }
+
+  public handleGearboxPositionChange(gearboxPosition: GearboxPosition): void {
+    this.gearbox.setGearboxPosition(gearboxPosition);
+  }
+
+  public handleGearboxModeChange(gearboxMode: GearboxMode): void {
+    this.gearbox.setGearboxMode(gearboxMode)
+  }
+
+  public handleGearboxAggressionLevelChange(gearboxAggressionLevel: GearboxAggressionLevel): void {
+    this.gearbox.setGearboxAggressionLevel(gearboxAggressionLevel);
+  }
+
+  public increaseGearManually(): void {
+    if (this.gearbox.isPositionDrive() && this.gearbox.increaseGear()) {
+      this.engine.handleGearIncreased();
+    }
+  }
+
+  public decreaseGearManually(): void {
+    if (this.gearbox.isPositionDrive() && this.gearbox.decreaseGear()) {
+      this.engine.handleGearDecreased();
+    }
   }
 }
