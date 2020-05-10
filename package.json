@@ -7,7 +7,10 @@
     "build": "ng build",
     "test": "ng test",
     "lint": "ng lint",
-    "e2e": "ng e2e"
+    "e2e": "ng e2e",
+    "ci:test": "ng test --watch=false --no-progress --browsers=ChromeHeadlessNoSandbox",
+    "ci:e2e": "ng e2e --protractor-config=e2e/protractor-ci.conf.js",
+    "ci:all_checks": "npm run ci:test && npm run ci:e2e"
   },
   "husky": {
     "hooks": {
