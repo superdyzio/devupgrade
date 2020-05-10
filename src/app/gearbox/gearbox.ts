@@ -59,8 +59,8 @@ export class Gearbox {
     return this.characteristics[this.mode].throttle.increaseGearRpmLevel;
   }
 
-  public getDecreaseGearRpmLevel(): number {
-    return this.characteristics[this.mode].throttle.decreaseGearRpmLevel;
+  public getDecreaseGearRpmLevel(isBraking: boolean = false): number {
+    return this.characteristics[this.mode][isBraking ? 'brake' : 'throttle'].decreaseGearRpmLevel;
   }
 
   public setGearboxPosition(gearboxPosition: GearboxPosition): void {
@@ -80,8 +80,19 @@ export class Gearbox {
     return this.position === GearboxPosition.Drive;
   }
 
-  public isModeEco(): boolean {
-    return this.mode === GearboxMode.Eco;
+  public countKickdownGearDecrease(pedalsState: number): number {
+    return this.characteristics[this.mode].throttle.maxThrottleLevel
+      ? this.isKickdownThresholdCrossed(pedalsState, this.characteristics[this.mode].throttle.kickdown)
+      : 0;
+  }
+
+  private isKickdownThresholdCrossed(
+    pedalsState: number,
+    kickdownCharacteristics: GearboxKickdownCharacteristics
+  ): number {
+    return kickdownCharacteristics.maxThrottleLevel && pedalsState > kickdownCharacteristics.maxThrottleLevel
+      ? 1 + this.isKickdownThresholdCrossed(pedalsState, kickdownCharacteristics.nextLevelKickdown)
+      : 1;
   }
 
   public increaseGear(): boolean {

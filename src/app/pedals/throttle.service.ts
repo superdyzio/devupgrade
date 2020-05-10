@@ -1,13 +1,14 @@
 import { Injectable } from '@angular/core';
-import { EngineService } from '../engine/engine.service';
+import { PedalsService } from './pedals.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ThrottleService {
-  constructor(private engine: EngineService) { }
+  constructor(private pedalsService: PedalsService) { }
 
   public push(): void {
-    this.engine.accelerate();
+    const throttleLevel = 0.3;
+    this.pedalsService.setPedalState(throttleLevel);
   }
 }

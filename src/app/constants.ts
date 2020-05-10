@@ -1,0 +1,1 @@
+export const REFRESH_STATE_INTERVAL_MS = 500;
