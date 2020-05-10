@@ -104,7 +104,7 @@ export class GearboxService implements OnDestroy {
   }
 
   public handleGearboxModeChange(gearboxMode: GearboxMode): void {
-    this.gearbox.setGearboxMode(gearboxMode)
+    this.gearbox.setGearboxMode(gearboxMode);
   }
 
   public handleGearboxAggressionLevelChange(gearboxAggressionLevel: GearboxAggressionLevel): void {

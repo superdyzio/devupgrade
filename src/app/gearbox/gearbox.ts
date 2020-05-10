@@ -42,7 +42,7 @@ interface GearboxModeCharacteristics {
 
 export type GearboxCharacteristics = {
   [key in GearboxMode]: GearboxModeCharacteristics;
-}
+};
 
 export class Gearbox {
   public constructor(

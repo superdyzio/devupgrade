@@ -7,7 +7,7 @@ import { REFRESH_STATE_INTERVAL_MS } from '../constants';
   providedIn: 'root'
 })
 export class PedalsService {
-  private currentPedalsState: number = 0;
+  private currentPedalsState = 0;
   public pedalState$: Observable<number> = interval(REFRESH_STATE_INTERVAL_MS)
     .pipe(map(() => this.currentPedalsState));
 
