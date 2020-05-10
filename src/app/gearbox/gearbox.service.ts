@@ -21,7 +21,7 @@ export class GearboxService implements OnDestroy {
       {
         [GearboxMode.Eco]: {
           throttle: {
-            increaseGearRpmLevel: 3000,
+            increaseGearRpmLevel: 2000,
             decreaseGearRpmLevel: 1000,
             maxThrottleLevel: null
           },
@@ -135,6 +135,7 @@ export class GearboxService implements OnDestroy {
     if (pedals < 0 && rpm < this.gearbox.getDecreaseGearRpmLevel(true) && this.gearbox.decreaseGear()) {
       this.engine.handleGearDecreased();
     } else {
+      // todo - change gears when engine braking
       this.engine.engineBreak();
     }
   }

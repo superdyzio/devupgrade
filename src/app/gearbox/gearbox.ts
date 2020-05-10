@@ -90,6 +90,7 @@ export class Gearbox {
     pedalsState: number,
     kickdownCharacteristics: GearboxKickdownCharacteristics
   ): number {
+    // todo - something is wrong here - check value if there is no nextLevelKickdown
     return kickdownCharacteristics.maxThrottleLevel && pedalsState > kickdownCharacteristics.maxThrottleLevel
       ? 1 + this.isKickdownThresholdCrossed(pedalsState, kickdownCharacteristics.nextLevelKickdown)
       : 1;
