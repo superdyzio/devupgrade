@@ -1,9 +1,10 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { Gearbox, GearboxAggressionLevel, GearboxMode, GearboxPosition } from './gearbox';
 import { EngineService } from '../engine/engine.service';
-import { combineLatest, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { filter, map, tap, withLatestFrom } from 'rxjs/operators';
 import { PedalsService } from '../pedals/pedals.service';
+import { GEARBOX_CHARACTERISTICS } from '../constants';
 
 @Injectable({
   providedIn: 'root'
@@ -18,52 +19,7 @@ export class GearboxService implements OnDestroy {
   ) {
     this.gearbox = new Gearbox(
       6,
-      {
-        [GearboxMode.Eco]: {
-          throttle: {
-            increaseGearRpmLevel: 2000,
-            decreaseGearRpmLevel: 1000,
-            maxThrottleLevel: null
-          },
-          brake: {
-            decreaseGearRpmLevel: 1500,
-          }
-        },
-        [GearboxMode.Comfort]: {
-          throttle: {
-            increaseGearRpmLevel: 2500,
-            decreaseGearRpmLevel: 1000,
-            maxThrottleLevel: 0.5,
-            kickdown: {
-              decreaseGearMaxRpmLevel: 4500,
-              maxThrottleLevel: null,
-              nextLevelKickdown: null
-            }
-          },
-          brake: {
-            decreaseGearRpmLevel: 2000
-          }
-        },
-        [GearboxMode.Sport]: {
-          throttle: {
-            increaseGearRpmLevel: 5000,
-            decreaseGearRpmLevel: 1500,
-            maxThrottleLevel: 0.5,
-            kickdown: {
-              decreaseGearMaxRpmLevel: 5000,
-              maxThrottleLevel: 0.7,
-              nextLevelKickdown: {
-                decreaseGearMaxRpmLevel: 5000,
-                maxThrottleLevel: null,
-                nextLevelKickdown: null,
-              }
-            }
-          },
-          brake: {
-            decreaseGearRpmLevel: 3000
-          }
-        }
-      }
+      GEARBOX_CHARACTERISTICS
     );
 
     this.gearboxDriver = this.engine.currentRpm$
