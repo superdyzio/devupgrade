@@ -28,7 +28,7 @@ interface GearboxThrottleCharacteristics {
   increaseGearRpmLevel: number;
   decreaseGearRpmLevel: number;
   maxThrottleLevel: number | null;
-  kickdown?: GearboxKickdownCharacteristics;
+  nextLevelKickdown?: GearboxKickdownCharacteristics;
 }
 
 interface GearboxBrakeCharacteristics {
@@ -81,19 +81,16 @@ export class Gearbox {
   }
 
   public countKickdownGearDecrease(pedalsState: number): number {
-    return this.characteristics[this.mode].throttle.maxThrottleLevel
-      ? this.isKickdownThresholdCrossed(pedalsState, this.characteristics[this.mode].throttle.kickdown)
-      : 0;
+    return this.isKickdownThresholdCrossed(pedalsState, this.characteristics[this.mode].throttle);
   }
 
   private isKickdownThresholdCrossed(
     pedalsState: number,
-    kickdownCharacteristics: GearboxKickdownCharacteristics
+    kickdownCharacteristics: GearboxKickdownCharacteristics | GearboxThrottleCharacteristics
   ): number {
-    // todo - something is wrong here - check value if there is no nextLevelKickdown
-    return kickdownCharacteristics.maxThrottleLevel && pedalsState > kickdownCharacteristics.maxThrottleLevel
+    return kickdownCharacteristics.maxThrottleLevel && pedalsState >= kickdownCharacteristics.maxThrottleLevel
       ? 1 + this.isKickdownThresholdCrossed(pedalsState, kickdownCharacteristics.nextLevelKickdown)
-      : 1;
+      : 0;
   }
 
   public increaseGear(): boolean {
