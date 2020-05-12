@@ -6,17 +6,21 @@ import { LightsModule } from '../lights/lights.module';
 import { PaddlesModule } from '../paddles/paddles.module';
 import { PedalsModule } from '../pedals/pedals.module';
 import { TrailerModule } from '../trailer/trailer.module';
+import { DashboardComponent } from './dashboard/dashboard.component';
 
 @NgModule({
-  declarations: [],
-  imports: [
-    CommonModule,
-    EngineModule,
-    GearboxModule,
-    LightsModule,
-    PaddlesModule,
-    PedalsModule,
-    TrailerModule
-  ]
+    declarations: [DashboardComponent],
+    exports: [
+        DashboardComponent
+    ],
+    imports: [
+        CommonModule,
+        EngineModule,
+        GearboxModule,
+        LightsModule,
+        PaddlesModule,
+        PedalsModule,
+        TrailerModule
+    ]
 })
 export class CarModule { }

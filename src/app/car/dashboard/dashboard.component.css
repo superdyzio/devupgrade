@@ -1,0 +1,59 @@
+:host {
+  height: 100%;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 20% 60% 20%;
+  grid-template-rows: 30% 60% 10%;
+  grid-template-areas: 'controls controls controls' 'leftFire gauges rightFire' 'footer footer footer';
+}
+
+#controls {
+  grid-area: controls;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  padding: 60px 20px;
+}
+
+#controls div {
+  width: 15%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+}
+
+#controls div button {
+  display: block;
+  height: 40%;
+  width: 90%;
+  margin: 5%;
+}
+
+#controls div label {
+  display: block;
+  margin: 8px;
+}
+
+#controls div label input {
+  margin: 4px;
+}
+
+#leftFire {
+  grid-area: leftFire;
+  background: red;
+}
+
+#rightFire {
+  grid-area: rightFire;
+  background: red;
+}
+
+#gauges {
+  grid-area: gauges;
+  background: green;
+}
+
+#footer {
+  grid-area: footer;
+  background: gray;
+}
