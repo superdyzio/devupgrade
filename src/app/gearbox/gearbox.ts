@@ -80,16 +80,12 @@ export class Gearbox {
     return this.position === GearboxPosition.Drive;
   }
 
-  public countKickdownGearDecrease(pedalsState: number): number {
-    return this.isKickdownThresholdCrossed(pedalsState, this.characteristics[this.mode].throttle);
-  }
-
-  private isKickdownThresholdCrossed(
+  public countKickdownGearDecrease(
     pedalsState: number,
-    kickdownCharacteristics: GearboxKickdownCharacteristics | GearboxThrottleCharacteristics
+    kickdownCharacteristics: GearboxKickdownCharacteristics | GearboxThrottleCharacteristics = this.characteristics[this.mode].throttle
   ): number {
     return kickdownCharacteristics.maxThrottleLevel && pedalsState >= kickdownCharacteristics.maxThrottleLevel
-      ? 1 + this.isKickdownThresholdCrossed(pedalsState, kickdownCharacteristics.nextLevelKickdown)
+      ? 1 + this.countKickdownGearDecrease(pedalsState, kickdownCharacteristics.nextLevelKickdown)
       : 0;
   }
 
