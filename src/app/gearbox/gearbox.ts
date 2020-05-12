@@ -18,6 +18,16 @@ export enum GearboxAggressionLevel {
   High = 3,
 }
 
+const AGGRESSION_MULTIPLIER_MAP = {
+  [GearboxMode.Eco]: 1,
+  [GearboxMode.Comfort]: 1,
+  [GearboxMode.Sport]: {
+    [GearboxAggressionLevel.Low]: 1,
+    [GearboxAggressionLevel.Medium]: 1.3,
+    [GearboxAggressionLevel.High]: 1.3,
+  }
+};
+
 interface GearboxKickdownCharacteristics {
   decreaseGearMaxRpmLevel: number;
   maxThrottleLevel: number | null;
@@ -44,6 +54,8 @@ export type GearboxCharacteristics = {
   [key in GearboxMode]: GearboxModeCharacteristics;
 };
 
+
+
 export class Gearbox {
   public constructor(
     public maxGear: number,
@@ -61,6 +73,10 @@ export class Gearbox {
 
   public getDecreaseGearRpmLevel(isBraking: boolean = false): number {
     return this.characteristics[this.mode][isBraking ? 'brake' : 'throttle'].decreaseGearRpmLevel;
+  }
+
+  public getMaxThrottleLevel(): number {
+    return this.characteristics[this.mode].throttle.maxThrottleLevel;
   }
 
   public setGearboxPosition(gearboxPosition: GearboxPosition): void {
@@ -87,6 +103,19 @@ export class Gearbox {
     return kickdownCharacteristics.maxThrottleLevel && pedalsState >= kickdownCharacteristics.maxThrottleLevel
       ? 1 + this.countKickdownGearDecrease(pedalsState, kickdownCharacteristics.nextLevelKickdown)
       : 0;
+  }
+
+  public getKickdownDecreaseGearMaxRpmLevel(
+    pedalsState: number,
+    kickdownCharacteristics: GearboxKickdownCharacteristics = this.characteristics[this.mode].throttle.nextLevelKickdown
+  ): number {
+    return kickdownCharacteristics.maxThrottleLevel && pedalsState >= kickdownCharacteristics.maxThrottleLevel
+      ? this.getKickdownDecreaseGearMaxRpmLevel(pedalsState, kickdownCharacteristics.nextLevelKickdown)
+      : kickdownCharacteristics.decreaseGearMaxRpmLevel * this.getAggressionMultiplier();
+  }
+
+  public getAggressionMultiplier(): number {
+    return AGGRESSION_MULTIPLIER_MAP[this.mode][this.aggressionLevel] || AGGRESSION_MULTIPLIER_MAP[this.mode];
   }
 
   public increaseGear(): boolean {

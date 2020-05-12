@@ -1,8 +1,6 @@
 import { Injectable, OnDestroy } from '@angular/core';
-import { interval, Observable, Subscription } from 'rxjs';
+import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { PedalsService } from '../pedals/pedals.service';
-import { map } from 'rxjs/operators';
-import { REFRESH_STATE_INTERVAL_MS } from '../constants';
 
 @Injectable({
   providedIn: 'root'
@@ -12,10 +10,9 @@ export class EngineService implements OnDestroy {
   private static MIN_RPM = 500;
   private static RPM_STEP = 500;
   private static RPM_LOSS_ON_ENGINE_BRAKE = 200;
-  private currentRpm: number = EngineService.MIN_RPM;
+  private currentRpmSubject: BehaviorSubject<number> = new BehaviorSubject<number>(EngineService.MIN_RPM);
   private pedalsStateSubscription: Subscription;
-  public currentRpm$: Observable<number> = interval(REFRESH_STATE_INTERVAL_MS)
-    .pipe(map(() => this.currentRpm));
+  public currentRpm$: Observable<number> = this.currentRpmSubject.asObservable();
 
   constructor(private pedalsService: PedalsService) {
     this.pedalsStateSubscription = this.pedalsService.pedalState$
@@ -62,14 +59,18 @@ export class EngineService implements OnDestroy {
   }
 
   public handleGearIncreased(): void {
-    this.setCurrentRpm(this.currentRpm - 2 * EngineService.RPM_STEP);
+    this.setCurrentRpm(this.currentRpm - this.currentRpm * .3);
   }
 
   public handleGearDecreased(): void {
-    this.setCurrentRpm(this.currentRpm + EngineService.RPM_STEP);
+    this.setCurrentRpm(this.currentRpm + this.currentRpm * .3);
+  }
+
+  private get currentRpm(): number {
+    return this.currentRpmSubject.value;
   }
 
   private setCurrentRpm(rpm: number): void {
-    this.currentRpm = rpm;
+    this.currentRpmSubject.next(rpm);
   }
 }
