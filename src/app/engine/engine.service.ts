@@ -1,7 +1,7 @@
 import { Injectable, OnDestroy } from '@angular/core';
-import { BehaviorSubject, Observable, Subscription, interval } from 'rxjs';
+import { interval, Observable, Subscription } from 'rxjs';
 import { PedalsService } from '../pedals/pedals.service';
-import { map, mapTo, switchMap, tap } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 import { REFRESH_STATE_INTERVAL_MS } from '../constants';
 
 @Injectable({

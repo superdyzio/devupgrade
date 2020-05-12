@@ -17,10 +17,7 @@ export class GearboxService implements OnDestroy {
     private engine: EngineService,
     private pedalsService: PedalsService
   ) {
-    this.gearbox = new Gearbox(
-      6,
-      GEARBOX_CHARACTERISTICS
-    );
+    this.gearbox = new Gearbox(6, GEARBOX_CHARACTERISTICS);
 
     this.gearboxDriver = this.engine.currentRpm$
       .pipe(
@@ -91,8 +88,13 @@ export class GearboxService implements OnDestroy {
     if (pedals < 0 && rpm < this.gearbox.getDecreaseGearRpmLevel(true) && this.gearbox.decreaseGear()) {
       this.engine.handleGearDecreased();
     } else {
-      // todo - change gears when engine braking
-      this.engine.engineBreak();
+      if (rpm < this.gearbox.getDecreaseGearRpmLevel(true)) {
+        if (this.gearbox.decreaseGear()) {
+          this.engine.handleGearDecreased();
+        } else {
+          this.engine.engineBreak();
+        }
+      }
     }
   }
 }

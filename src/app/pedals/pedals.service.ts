@@ -1,5 +1,5 @@
-import { Injectable, OnDestroy } from '@angular/core';
-import { BehaviorSubject, interval, Observable } from 'rxjs';
+import { Injectable } from '@angular/core';
+import { interval, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { REFRESH_STATE_INTERVAL_MS } from '../constants';
 

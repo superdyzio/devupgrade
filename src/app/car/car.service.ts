@@ -5,6 +5,7 @@ import { GearboxService } from '../gearbox/gearbox.service';
 import { GearboxAggressionLevel, GearboxMode, GearboxPosition } from '../gearbox/gearbox';
 import { ThrottleService } from '../pedals/throttle.service';
 import { BrakeService } from '../pedals/brake.service';
+import { PedalsService } from '../pedals/pedals.service';
 
 @Injectable({
   providedIn: 'root'
@@ -15,7 +16,8 @@ export class CarService {
     private leftPaddle: LeftPaddleService,
     private rightPaddle: RightPaddleService,
     private throttle: ThrottleService,
-    private brake: BrakeService
+    private brake: BrakeService,
+    private pedals: PedalsService,
   ) { }
 
   public setPositionToParking(): void {
@@ -72,5 +74,9 @@ export class CarService {
 
   public pushBrakePedal(): void {
     this.brake.push();
+  }
+
+  public releasePedals(): void {
+    this.pedals.setPedalState(0);
   }
 }

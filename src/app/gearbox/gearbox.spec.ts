@@ -1,5 +1,5 @@
-import {Gearbox, GearboxMode, GearboxPosition} from './gearbox';
-import {GEARBOX_CHARACTERISTICS} from '../constants';
+import { Gearbox, GearboxMode, GearboxPosition } from './gearbox';
+import { GEARBOX_CHARACTERISTICS } from '../constants';
 
 describe('Gearbox', () => {
   let gearbox;
