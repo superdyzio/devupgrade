@@ -14,4 +14,8 @@ export class PedalsService {
   public setPedalState(pedalState: number): void {
     this.currentPedalsState = pedalState;
   }
+
+  public arePedalsReleased(): boolean {
+    return this.currentPedalsState === 0;
+  }
 }

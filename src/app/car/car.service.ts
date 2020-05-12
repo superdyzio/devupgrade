@@ -12,12 +12,12 @@ import { PedalsService } from '../pedals/pedals.service';
 })
 export class CarService {
   constructor(
+    public pedals: PedalsService,
     private gearbox: GearboxService,
     private leftPaddle: LeftPaddleService,
     private rightPaddle: RightPaddleService,
     private throttle: ThrottleService,
     private brake: BrakeService,
-    private pedals: PedalsService,
   ) { }
 
   public setPositionToParking(): void {
@@ -68,6 +68,10 @@ export class CarService {
     this.rightPaddle.push();
   }
 
+  public setPedalState(value): void {
+    value = Math.max(Math.min(value, 1), -1);
+    this.pedals.setPedalState(value);
+  }
   public pushThrottlePedal(): void {
     this.throttle.push();
   }
