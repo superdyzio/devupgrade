@@ -42,7 +42,7 @@ describe('GearboxService', () => {
     expect(service).toBeTruthy();
   });
 
-  describe('eco mode', () => {
+  xdescribe('eco mode', () => {
 
     it('should', done => {
       // arrange
