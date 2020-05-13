@@ -1,21 +1,19 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
+
 import { PedalsService } from '../pedals/pedals.service';
+import { MAX_RPM, MIN_RPM, RPM_LOSS_ON_ENGINE_BRAKE, RPM_STEP } from '../constants';
 
 @Injectable({
   providedIn: 'root'
 })
 export class EngineService implements OnDestroy {
-  private static MAX_RPM = 7000;
-  private static MIN_RPM = 500;
-  private static RPM_STEP = 500;
-  private static RPM_LOSS_ON_ENGINE_BRAKE = 200;
-  private currentRpmSubject: BehaviorSubject<number> = new BehaviorSubject<number>(EngineService.MIN_RPM);
+  private currentRpmSubject: BehaviorSubject<number> = new BehaviorSubject<number>(MIN_RPM);
   private pedalsStateSubscription: Subscription;
   public currentRpm$: Observable<number> = this.currentRpmSubject.asObservable();
 
   constructor(private pedalsService: PedalsService) {
-    this.pedalsStateSubscription = this.pedalsService.pedalState$
+    this.pedalsStateSubscription = this.pedalsService.pedalsState$
       .subscribe((pedalsState: number) => {
         if (pedalsState > 0) {
           this.accelerate(pedalsState);
@@ -31,31 +29,34 @@ export class EngineService implements OnDestroy {
     this.pedalsStateSubscription.unsubscribe();
   }
 
+  public turnOn(): void {
+    this.setCurrentRpm(MIN_RPM);
+  }
+
+  public turnOff(): void {
+    this.setCurrentRpm(0);
+  }
+
   private accelerate(throttleLevel: number): void {
-    const rpmIncrease = throttleLevel * EngineService.RPM_STEP;
-    if (this.currentRpm + rpmIncrease <= EngineService.MAX_RPM) {
-      this.setCurrentRpm(
-        this.currentRpm + throttleLevel * EngineService.RPM_STEP
-      );
-    } else {
-      this.setCurrentRpm(EngineService.MAX_RPM);
-    }
+    this.setCurrentRpm(
+      Math.min(
+        Math.max(this.currentRpm + throttleLevel * RPM_STEP, MIN_RPM),
+        MAX_RPM
+      )
+    );
   }
 
   private decelerate(brakeLevel: number): void {
-    const rpmDecrease = Math.abs(brakeLevel) * EngineService.RPM_STEP;
-    if (this.currentRpm - rpmDecrease >= EngineService.MIN_RPM) {
-      this.setCurrentRpm(this.currentRpm - rpmDecrease);
-    } else {
-      this.setCurrentRpm(EngineService.MIN_RPM);
-    }
+    this.setCurrentRpm(
+      Math.max(this.currentRpm - Math.abs(brakeLevel) * RPM_STEP, MIN_RPM)
+    );
   }
 
   public engineBreak(): void {
-    if (this.currentRpm - EngineService.RPM_LOSS_ON_ENGINE_BRAKE >= EngineService.MIN_RPM) {
-      this.setCurrentRpm(this.currentRpm - EngineService.RPM_LOSS_ON_ENGINE_BRAKE);
+    if (this.currentRpm - RPM_LOSS_ON_ENGINE_BRAKE >= MIN_RPM) {
+      this.setCurrentRpm(this.currentRpm - RPM_LOSS_ON_ENGINE_BRAKE);
     } else {
-      this.setCurrentRpm(EngineService.MIN_RPM);
+      this.setCurrentRpm(MIN_RPM);
     }
   }
 

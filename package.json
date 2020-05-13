@@ -27,6 +27,9 @@
     "@angular/platform-browser": "~9.1.6",
     "@angular/platform-browser-dynamic": "~9.1.6",
     "@angular/router": "~9.1.6",
+    "gojs": "^2.1.16",
+    "gojs-angular": "^1.0.3",
+    "ng5-slider": "^1.2.4",
     "rxjs": "~6.5.4",
     "tslib": "^1.10.0",
     "zone.js": "~0.10.2"

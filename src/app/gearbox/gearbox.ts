@@ -9,7 +9,6 @@ export enum GearboxMode {
   Eco = 'ECO',
   Comfort = 'COMFORT',
   Sport = 'SPORT',
-  // SportPlus = 'SPORT_PLUS',
 }
 
 export enum GearboxAggressionLevel {
@@ -27,6 +26,13 @@ const AGGRESSION_MULTIPLIER_MAP = {
     [GearboxAggressionLevel.High]: 1.3,
   }
 };
+
+export interface GearboxStatus {
+  position: GearboxPosition;
+  mode: GearboxMode;
+  aggressionLevel: GearboxAggressionLevel;
+  currentGear: number;
+}
 
 interface GearboxKickdownCharacteristics {
   decreaseGearMaxRpmLevel: number;
@@ -53,8 +59,6 @@ interface GearboxModeCharacteristics {
 export type GearboxCharacteristics = {
   [key in GearboxMode]: GearboxModeCharacteristics;
 };
-
-
 
 export class Gearbox {
   public constructor(

@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+
 import { Paddle } from './paddle';
 import { GearboxService } from '../gearbox/gearbox.service';
 
@@ -8,6 +9,7 @@ import { GearboxService } from '../gearbox/gearbox.service';
 export class RightPaddleService implements Paddle {
   constructor(private gearbox: GearboxService) {
   }
+
   public push(): void {
     this.gearbox.increaseGearManually();
   }

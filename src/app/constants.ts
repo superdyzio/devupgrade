@@ -1,4 +1,4 @@
-import { GearboxMode } from './gearbox/gearbox';
+import { GearboxMode, GearboxPosition } from './gearbox/gearbox';
 
 export const REFRESH_STATE_INTERVAL_MS = 500;
 export const GEARBOX_CHARACTERISTICS = {
@@ -48,3 +48,12 @@ export const GEARBOX_CHARACTERISTICS = {
     }
   }
 };
+export const GEARBOX_GEAR_SYMBOL_MAP = {
+  [GearboxPosition.Parking]: 'P',
+  [GearboxPosition.Reverse]: 'R',
+  [GearboxPosition.Neutral]: 'N'
+};
+export const MAX_RPM = 7000;
+export const MIN_RPM = 500;
+export const RPM_STEP = 500;
+export const RPM_LOSS_ON_ENGINE_BRAKE = 200;
