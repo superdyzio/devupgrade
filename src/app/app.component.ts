@@ -1,11 +1,8 @@
 import { Component } from '@angular/core';
-import { CarService } from './car/car.service';
 
 @Component({
   selector: 'app-root',
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css']
+  template: `<app-dashboard></app-dashboard>`,
 })
 export class AppComponent {
-  constructor(public car: CarService) { }
 }

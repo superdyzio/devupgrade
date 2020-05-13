@@ -9,7 +9,6 @@ export enum GearboxMode {
   Eco = 'ECO',
   Comfort = 'COMFORT',
   Sport = 'SPORT',
-  // SportPlus = 'SPORT_PLUS',
 }
 
 export enum GearboxAggressionLevel {
@@ -27,6 +26,13 @@ const AGGRESSION_MULTIPLIER_MAP = {
     [GearboxAggressionLevel.High]: 1.3,
   }
 };
+
+export interface GearboxStatus {
+  position: GearboxPosition;
+  mode: GearboxMode;
+  aggressionLevel: GearboxAggressionLevel;
+  currentGear: number;
+}
 
 interface GearboxKickdownCharacteristics {
   decreaseGearMaxRpmLevel: number;
@@ -53,8 +59,6 @@ interface GearboxModeCharacteristics {
 export type GearboxCharacteristics = {
   [key in GearboxMode]: GearboxModeCharacteristics;
 };
-
-
 
 export class Gearbox {
   public constructor(
@@ -96,6 +100,14 @@ export class Gearbox {
     return this.position === GearboxPosition.Drive;
   }
 
+  public isPositionParking(): boolean {
+    return this.position === GearboxPosition.Parking;
+  }
+
+  public isPositionNeutral(): boolean {
+    return this.position === GearboxPosition.Neutral;
+  }
+
   public countKickdownGearDecrease(
     pedalsState: number,
     kickdownCharacteristics: GearboxKickdownCharacteristics | GearboxThrottleCharacteristics = this.characteristics[this.mode].throttle
@@ -119,7 +131,7 @@ export class Gearbox {
   }
 
   public increaseGear(): boolean {
-    if (this.currentGear === this.maxGear) {
+    if (!this.currentGear || this.currentGear === this.maxGear) {
       return false;
     }
 
@@ -129,7 +141,7 @@ export class Gearbox {
   }
 
   public decreaseGear(): boolean {
-    if (this.currentGear === 1) {
+    if (!this.currentGear || this.currentGear === 1) {
       return false;
     }
 

@@ -1,23 +1,27 @@
 import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
+import { withLatestFrom } from 'rxjs/operators';
+
 import { LeftPaddleService } from '../paddles/left-paddle.service';
 import { RightPaddleService } from '../paddles/right-paddle.service';
 import { GearboxService } from '../gearbox/gearbox.service';
-import { GearboxAggressionLevel, GearboxMode, GearboxPosition } from '../gearbox/gearbox';
-import { ThrottleService } from '../pedals/throttle.service';
-import { BrakeService } from '../pedals/brake.service';
+import { GearboxAggressionLevel, GearboxMode, GearboxPosition, GearboxStatus } from '../gearbox/gearbox';
+import { EngineService } from '../engine/engine.service';
 import { PedalsService } from '../pedals/pedals.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class CarService {
+  public dashboardData$: Observable<[GearboxStatus, number]> = this.gearbox.gearboxStatus$
+    .pipe(withLatestFrom(this.engine.currentRpm$));
+
   constructor(
-    public pedals: PedalsService,
+    private engine: EngineService,
     private gearbox: GearboxService,
     private leftPaddle: LeftPaddleService,
     private rightPaddle: RightPaddleService,
-    private throttle: ThrottleService,
-    private brake: BrakeService,
+    private pedals: PedalsService
   ) { }
 
   public setPositionToParking(): void {
@@ -68,8 +72,7 @@ export class CarService {
     this.rightPaddle.push();
   }
 
-  public setPedalState(value): void {
-    value = Math.max(Math.min(value, 1), -1);
-    this.pedals.setPedalState(value);
+  public handlePedalsChange(pedalsState: number): void {
+    this.pedals.setPedalsState(pedalsState);
   }
 }
