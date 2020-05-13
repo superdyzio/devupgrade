@@ -56,7 +56,7 @@ export class DashboardComponent implements OnDestroy, AfterContentInit {
 
         this.allowManualGearChange = gearboxStatus.position === GearboxPosition.Drive;
         this.allowAggressionLevelChange = gearboxStatus.mode === GearboxMode.Sport;
-        this.isStopped = gearboxStatus.position === GearboxPosition.Neutral
+        this.isStopped = gearboxStatus.position === GearboxPosition.Neutral && rpm === MIN_RPM
           || gearboxStatus.position === GearboxPosition.Parking
           || ((gearboxStatus.currentGear === 1 || gearboxStatus.position === GearboxPosition.Reverse) && rpm === MIN_RPM);
 

@@ -8,23 +8,40 @@
 
     <div>
       <label>
-        <input [disabled]="!isStopped" type="radio" name="gearbox-position" value="DRIVE"
-               (change)="car.setPositionToDrive()">
+        <input [disabled]="!isStopped"
+               (change)="car.setPositionToDrive()"
+               type="radio"
+               name="gearbox-position"
+               value="DRIVE"
+        >
         Drive
       </label>
       <label>
-        <input [disabled]="!isStopped" type="radio" name="gearbox-position" value="PARKING"
-               (change)="car.setPositionToParking()" checked>
+        <input [disabled]="!isStopped"
+               (change)="car.setPositionToParking()"
+               checked
+               type="radio"
+               name="gearbox-position"
+               value="PARKING"
+        >
         Parking
       </label>
       <label>
-        <input [disabled]="!isStopped" type="radio" name="gearbox-position" value="NEUTRAL"
-               (change)="car.setPositionToNeutral()">
+        <input [disabled]="!isStopped"
+               (change)="car.setPositionToNeutral()"
+               type="radio"
+               name="gearbox-position"
+               value="NEUTRAL"
+        >
         Neutral
       </label>
       <label>
-        <input [disabled]="!isStopped" type="radio" name="gearbox-position" value="REVERSE"
-               (change)="car.setPositionToReverse()">
+        <input [disabled]="!isStopped"
+               (change)="car.setPositionToReverse()"
+               type="radio"
+               name="gearbox-position"
+               value="REVERSE"
+        >
         Reverse
       </label>
     </div>
@@ -46,18 +63,31 @@
 
     <div>
       <label>
-        <input [disabled]="!allowAggressionLevelChange" type="radio" name="gearbox-aggression-level" value="1"
-               (click)="car.setAggressionLevelToLow()" checked>
+        <input [disabled]="!allowAggressionLevelChange"
+               (click)="car.setAggressionLevelToLow()"
+               checked
+               type="radio"
+               name="gearbox-aggression-level"
+               value="1"
+        >
         Agg 1
       </label>
       <label>
-        <input [disabled]="!allowAggressionLevelChange" type="radio" name="gearbox-aggression-level" value="2"
-               (click)="car.setAggressionLevelToMedium()">
+        <input [disabled]="!allowAggressionLevelChange"
+               (click)="car.setAggressionLevelToMedium()"
+               type="radio"
+               name="gearbox-aggression-level"
+               value="2"
+        >
         Agg 2
       </label>
       <label>
-        <input [disabled]="!allowAggressionLevelChange" type="radio" name="gearbox-aggression-level" value="3"
-               (click)="car.setAggressionLevelToHigh()">
+        <input [disabled]="!allowAggressionLevelChange"
+               (click)="car.setAggressionLevelToHigh()"
+               type="radio"
+               name="gearbox-aggression-level"
+               value="3"
+        >
         Agg 3
       </label>
     </div>
