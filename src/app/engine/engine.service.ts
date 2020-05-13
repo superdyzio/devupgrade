@@ -1,17 +1,15 @@
 import { Injectable, OnDestroy } from '@angular/core';
-import { BehaviorSubject, Observable, Subscription, interval } from 'rxjs';
+import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { PedalsService } from '../pedals/pedals.service';
-import { map, mapTo, switchMap, tap } from 'rxjs/operators';
-import { MAX_RPM, MIN_RPM, REFRESH_STATE_INTERVAL_MS, RPM_LOSS_ON_ENGINE_BRAKE, RPM_STEP } from '../constants';
+import { MAX_RPM, MIN_RPM, RPM_LOSS_ON_ENGINE_BRAKE, RPM_STEP } from '../constants';
 
 @Injectable({
   providedIn: 'root'
 })
 export class EngineService implements OnDestroy {
-  private currentRpm = 0;
+  private currentRpmSubject: BehaviorSubject<number> = new BehaviorSubject<number>(MIN_RPM);
   private pedalsStateSubscription: Subscription;
-  public currentRpm$: Observable<number> = interval(REFRESH_STATE_INTERVAL_MS)
-    .pipe(map(() => this.currentRpm));
+  public currentRpm$: Observable<number> = this.currentRpmSubject.asObservable();
 
   constructor(private pedalsService: PedalsService) {
     this.pedalsStateSubscription = this.pedalsService.pedalState$
@@ -19,7 +17,7 @@ export class EngineService implements OnDestroy {
         if (pedalsState > 0) {
           this.accelerate(pedalsState);
         } else if (pedalsState < 0) {
-          this.decelerate();
+          this.decelerate(pedalsState);
         } else {
           this.engineBreak();
         }
@@ -47,9 +45,9 @@ export class EngineService implements OnDestroy {
     );
   }
 
-  private decelerate(): void {
+  private decelerate(brakeLevel: number): void {
     this.setCurrentRpm(
-      Math.max(this.currentRpm - RPM_STEP, MIN_RPM)
+      Math.max(this.currentRpm - Math.abs(brakeLevel) * RPM_STEP, MIN_RPM)
     );
   }
 
@@ -62,14 +60,18 @@ export class EngineService implements OnDestroy {
   }
 
   public handleGearIncreased(): void {
-    this.setCurrentRpm(this.currentRpm - 2 * RPM_STEP);
+    this.setCurrentRpm(Math.floor(this.currentRpm - this.currentRpm * .5));
   }
 
   public handleGearDecreased(): void {
-    this.setCurrentRpm(this.currentRpm + RPM_STEP);
+    this.setCurrentRpm(Math.floor(this.currentRpm + this.currentRpm * .3));
+  }
+
+  private get currentRpm(): number {
+    return this.currentRpmSubject.value;
   }
 
   private setCurrentRpm(rpm: number): void {
-    this.currentRpm = rpm;
+    this.currentRpmSubject.next(rpm);
   }
 }

@@ -1,8 +1,8 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { Gearbox, GearboxAggressionLevel, GearboxMode, GearboxPosition, GearboxStatus } from './gearbox';
 import { EngineService } from '../engine/engine.service';
+import { tap, withLatestFrom } from 'rxjs/operators';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
-import { map, tap, withLatestFrom } from 'rxjs/operators';
 import { PedalsService } from '../pedals/pedals.service';
 import { GEARBOX_CHARACTERISTICS } from '../constants';
 
@@ -12,6 +12,8 @@ import { GEARBOX_CHARACTERISTICS } from '../constants';
 export class GearboxService implements OnDestroy {
   private gearbox: Gearbox;
   private gearboxDriver: Subscription;
+  private isKickdown: boolean;
+  private kickdownDecreaseCounter: number = null;
   private gearboxStatusSubject: BehaviorSubject<GearboxStatus>;
   public gearboxStatus$: Observable<GearboxStatus>;
 
@@ -19,10 +21,7 @@ export class GearboxService implements OnDestroy {
     private engine: EngineService,
     private pedalsService: PedalsService
   ) {
-    this.gearbox = new Gearbox(
-      6,
-      GEARBOX_CHARACTERISTICS
-    );
+    this.gearbox = new Gearbox(6, GEARBOX_CHARACTERISTICS);
 
     this.gearboxStatusSubject = new BehaviorSubject<GearboxStatus>({
       position: this.gearbox.position,
@@ -32,7 +31,7 @@ export class GearboxService implements OnDestroy {
     });
     this.gearboxStatus$ = this.gearboxStatusSubject.asObservable();
 
-    this.gearboxDriver = this.engine.currentRpm$
+    this.gearboxDriver = this.pedalsService.pedalState$
       .pipe(
         tap(() => {
           this.gearboxStatusSubject.next({
@@ -42,42 +41,36 @@ export class GearboxService implements OnDestroy {
             currentGear: this.gearbox.currentGear
           });
         }),
-        withLatestFrom(this.pedalsService.pedalState$),
-        // tap(([rpm, pedals]) => console.log(rpm, pedals, this.gearbox.currentGear)),
-        map(([rpm, pedals]) => ({
-          rpm,
-          pedals,
-          kickdownGearDecreaseCount: this.gearbox.countKickdownGearDecrease(pedals),
-          mode: this.gearbox.mode,
-          position: this.gearbox.position
-        })),
+        tap(pedals => this.setKickdownFlags(pedals)),
+        withLatestFrom(this.engine.currentRpm$),
+        tap(([pedals, rpm]) => console.log(rpm, pedals, this.gearbox.currentGear)),
       )
-      .subscribe(({rpm, pedals, kickdownGearDecreaseCount, mode, position}) => {
-        if (position === GearboxPosition.Parking && rpm > 0) {
+      .subscribe(([pedals, rpm]) => {
+        if (this.position === GearboxPosition.Parking && rpm > 0) {
           this.engine.turnOff();
         }
-        if (position !== GearboxPosition.Parking && rpm === 0) {
+        if (this.position !== GearboxPosition.Parking && rpm === 0) {
           this.engine.turnOn();
         }
 
-        if (position === GearboxPosition.Neutral) {
+        if (this.position === GearboxPosition.Neutral) {
           return;
         }
 
-        switch (mode) {
-          case GearboxMode.Eco:
-            pedals > 0
-              ? this.handleThrottleOnEco(rpm)
-              : this.handleBrakeOnEco(rpm, pedals);
-            break;
-          case GearboxMode.Comfort:
-            break;
-          case GearboxMode.Sport:
-            break;
-          default:
-            console.error(`Wrong gearbox mode: ${mode}`);
+        if (this.pedalsService.arePedalsReleased()) {
+          this.handleEngineBraking(rpm);
+        } else if (this.isKickdown) {
+          this.handleKickdown(rpm, pedals);
+        } else {
+          pedals > 0
+            ? this.handleThrottle(rpm)
+            : this.handleBrake(rpm);
         }
       });
+  }
+
+  public get position(): GearboxPosition {
+    return this.gearboxStatusSubject.value.position;
   }
 
   public ngOnDestroy() {
@@ -108,7 +101,25 @@ export class GearboxService implements OnDestroy {
     }
   }
 
-  private handleThrottleOnEco(rpm: number): void {
+  private setKickdownFlags(pedals: number): void {
+    const isKickdown = pedals > this.gearbox.getMaxThrottleLevel();
+    if (isKickdown && isKickdown !== this.isKickdown) {
+      this.kickdownDecreaseCounter = this.gearbox.countKickdownGearDecrease(pedals);
+    }
+    this.isKickdown = pedals > this.gearbox.getMaxThrottleLevel();
+  }
+
+  private handleEngineBraking(rpm: number): void {
+    if (rpm < this.gearbox.getDecreaseGearRpmLevel(true)) {
+      if (this.gearbox.decreaseGear()) {
+        this.engine.handleGearDecreased();
+      } else {
+        this.engine.engineBreak();
+      }
+    }
+  }
+
+  private handleThrottle(rpm): void {
     if (rpm >= this.gearbox.getIncreaseGearRpmLevel() && this.gearbox.increaseGear()) {
       this.engine.handleGearIncreased();
     } else if (rpm < this.gearbox.getDecreaseGearRpmLevel() && this.gearbox.decreaseGear()) {
@@ -116,12 +127,22 @@ export class GearboxService implements OnDestroy {
     }
   }
 
-  private handleBrakeOnEco(rpm: number, pedals: number): void {
-    if (pedals < 0 && rpm < this.gearbox.getDecreaseGearRpmLevel(true) && this.gearbox.decreaseGear()) {
+  private handleKickdown(rpm: number, pedals: number): void {
+    const kickdownDecreaseGearMaxRpmLevel = this.gearbox.getKickdownDecreaseGearMaxRpmLevel(pedals);
+    if (this.kickdownDecreaseCounter > 0 && rpm <= kickdownDecreaseGearMaxRpmLevel) {
+      this.kickdownDecreaseCounter--;
+      if (this.gearbox.decreaseGear()) {
+        this.engine.handleGearDecreased();
+      }
+    } else if (rpm > kickdownDecreaseGearMaxRpmLevel && this.gearbox.increaseGear()) {
+      this.kickdownDecreaseCounter--;
+      this.engine.handleGearIncreased();
+    }
+  }
+
+  private handleBrake(rpm): void {
+    if (rpm < this.gearbox.getDecreaseGearRpmLevel(true) && this.gearbox.decreaseGear()) {
       this.engine.handleGearDecreased();
-    } else {
-      // todo - change gears when engine braking
-      this.engine.engineBreak();
     }
   }
 }

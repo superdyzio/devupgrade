@@ -3,8 +3,6 @@ import { LeftPaddleService } from '../paddles/left-paddle.service';
 import { RightPaddleService } from '../paddles/right-paddle.service';
 import { GearboxService } from '../gearbox/gearbox.service';
 import { GearboxAggressionLevel, GearboxMode, GearboxPosition, GearboxStatus } from '../gearbox/gearbox';
-import { ThrottleService } from '../pedals/throttle.service';
-import { BrakeService } from '../pedals/brake.service';
 import { EngineService } from '../engine/engine.service';
 import { Observable } from 'rxjs';
 import { withLatestFrom } from 'rxjs/operators';
@@ -22,9 +20,7 @@ export class CarService {
     private gearbox: GearboxService,
     private leftPaddle: LeftPaddleService,
     private rightPaddle: RightPaddleService,
-    private throttle: ThrottleService,
-    private brake: BrakeService,
-    private pedalsService: PedalsService
+    private pedals: PedalsService
   ) { }
 
   public setPositionToParking(): void {
@@ -75,15 +71,7 @@ export class CarService {
     this.rightPaddle.push();
   }
 
-  public pushThrottlePedal(): void {
-    this.throttle.push();
-  }
-
-  public pushBrakePedal(): void {
-    this.brake.push();
-  }
-
   public handlePedalsChange(pedalsState: number): void {
-    this.pedalsService.setPedalState(pedalsState);
+    this.pedals.setPedalState(pedalsState);
   }
 }

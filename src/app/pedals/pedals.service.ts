@@ -1,5 +1,5 @@
-import { Injectable, OnDestroy } from '@angular/core';
-import { BehaviorSubject, interval, Observable } from 'rxjs';
+import { Injectable } from '@angular/core';
+import { interval, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { REFRESH_STATE_INTERVAL_MS } from '../constants';
 
@@ -13,5 +13,9 @@ export class PedalsService {
 
   public setPedalState(pedalState: number): void {
     this.currentPedalsState = pedalState;
+  }
+
+  public arePedalsReleased(): boolean {
+    return this.currentPedalsState === 0;
   }
 }
