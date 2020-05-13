@@ -74,10 +74,7 @@
     </div>
   </div>
 
-  <div id="leftFire" class="fire" [class.shoot]="showFire">
-    <div *ngIf="!showFire">WRUM</div>
-    <div *ngIf="showFire">OGIEŃ Z DUPY</div>
-  </div>
+  <div id="leftFire" class="fire" [class.shoot]="showFire"></div>
   <div id="gauges">
     <gojs-diagram
       [initDiagram]="initDiagram"
@@ -95,10 +92,7 @@
       </div>
     </div>
   </div>
-  <div id="rightFire" class="fire" [class.shoot]="showFire">
-    <div *ngIf="!showFire">WRUM</div>
-    <div *ngIf="showFire">OGIEŃ Z DUPY</div>
-  </div>
+  <div id="rightFire" class="fire" [class.shoot]="showFire"></div>
 
   <div id="footer">
     <ng5-slider [(value)]="value" [options]="options" (valueChange)="car.handlePedalsChange($event)"></ng5-slider>

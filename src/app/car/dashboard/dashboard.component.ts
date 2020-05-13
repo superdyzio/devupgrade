@@ -1,9 +1,11 @@
 import { AfterContentInit, Component, OnDestroy, ViewEncapsulation } from '@angular/core';
-import { CarService } from '../car.service';
 import * as go from 'gojs';
 import { Subscription } from 'rxjs';
+
+import { CarService } from '../car.service';
 import { GearboxAggressionLevel, GearboxMode, GearboxPosition, GearboxStatus } from '../../gearbox/gearbox';
 import { GEARBOX_GEAR_SYMBOL_MAP, MIN_RPM } from '../../constants';
+import { filter } from 'rxjs/operators';
 
 let diagram: go.Diagram;
 
@@ -35,35 +37,39 @@ export class DashboardComponent implements OnDestroy, AfterContentInit {
   }
 
   public ngAfterContentInit() {
-    this.dashboardDataSubscription = this.car.dashboardData$.subscribe(([gearboxStatus, rpm]: [GearboxStatus, number]) => {
-      this.rpm = rpm;
-      this.previousGear = typeof this.gear === 'number' ? this.gear : 0;
-      this.gear = GEARBOX_GEAR_SYMBOL_MAP[gearboxStatus.position] || gearboxStatus.currentGear;
-      if (
-        !this.showFire
-        && gearboxStatus.aggressionLevel === GearboxAggressionLevel.High
-        && !!this.previousGear
-        && !!gearboxStatus.currentGear
-        && this.previousGear === gearboxStatus.currentGear - 1
-      ) {
-       this.shootFire();
-      }
-      this.allowManualGearChange = gearboxStatus.position === GearboxPosition.Drive;
-      this.allowAggressionLevelChange = gearboxStatus.mode === GearboxMode.Sport;
-      this.isStopped = gearboxStatus.position === GearboxPosition.Neutral
-        || gearboxStatus.position === GearboxPosition.Parking
-        || ((gearboxStatus.currentGear === 1 || gearboxStatus.position === GearboxPosition.Reverse) && rpm === MIN_RPM);
+    this.dashboardDataSubscription = this.car.dashboardData$
+      .pipe(filter(() => !!diagram))
 
-      diagram.startTransaction();
-      diagram.nodes.each(node => {
-        const scale: any = node.findObject('SCALE');
-        if (scale === null || scale.type !== go.Panel.Graduated) {
-          return;
+      .subscribe(([gearboxStatus, rpm]: [GearboxStatus, number]) => {
+        this.rpm = rpm;
+        this.previousGear = typeof this.gear === 'number' ? this.gear : 0;
+        this.gear = GEARBOX_GEAR_SYMBOL_MAP[gearboxStatus.position] || gearboxStatus.currentGear;
+        if (
+          !this.showFire
+          && gearboxStatus.aggressionLevel === GearboxAggressionLevel.High
+          && !!this.previousGear
+          && !!gearboxStatus.currentGear
+          && this.previousGear === gearboxStatus.currentGear - 1
+        ) {
+          this.shootFire();
         }
-        diagram.model.setDataProperty(node.data, 'value', rpm);
+
+        this.allowManualGearChange = gearboxStatus.position === GearboxPosition.Drive;
+        this.allowAggressionLevelChange = gearboxStatus.mode === GearboxMode.Sport;
+        this.isStopped = gearboxStatus.position === GearboxPosition.Neutral
+          || gearboxStatus.position === GearboxPosition.Parking
+          || ((gearboxStatus.currentGear === 1 || gearboxStatus.position === GearboxPosition.Reverse) && rpm === MIN_RPM);
+
+        diagram.startTransaction();
+        diagram.nodes.each(node => {
+          const scale: any = node.findObject('SCALE');
+          if (scale === null || scale.type !== go.Panel.Graduated) {
+            return;
+          }
+          diagram.model.setDataProperty(node.data, 'value', rpm);
+        });
+        diagram.commitTransaction();
       });
-      diagram.commitTransaction();
-    });
   }
 
   public ngOnDestroy() {

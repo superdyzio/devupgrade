@@ -130,21 +130,3 @@ div.dashboard {
   color: black;
   font-weight: bold;
 }
-
-#footer .ng5-slider .ng5-slider-limit {
-  /*font-weight: bold;*/
-  /*color: orange;*/
-}
-
-#footer .ng5-slider .ng5-slider-tick {
-  /*width: 1px;*/
-  /*height: 10px;*/
-  /*margin-left: 4px;*/
-  /*border-radius: 0;*/
-  /*background: #ffe4d1;*/
-  /*top: -1px;*/
-}
-
-#footer .ng5-slider .ng5-slider-tick.ng5-slider-selected {
-  /*background: orange;*/
-}

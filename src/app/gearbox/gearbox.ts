@@ -9,7 +9,6 @@ export enum GearboxMode {
   Eco = 'ECO',
   Comfort = 'COMFORT',
   Sport = 'SPORT',
-  // SportPlus = 'SPORT_PLUS',
 }
 
 export enum GearboxAggressionLevel {

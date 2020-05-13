@@ -1,5 +1,6 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
+
 import { PedalsService } from '../pedals/pedals.service';
 import { MAX_RPM, MIN_RPM, RPM_LOSS_ON_ENGINE_BRAKE, RPM_STEP } from '../constants';
 
@@ -12,7 +13,7 @@ export class EngineService implements OnDestroy {
   public currentRpm$: Observable<number> = this.currentRpmSubject.asObservable();
 
   constructor(private pedalsService: PedalsService) {
-    this.pedalsStateSubscription = this.pedalsService.pedalState$
+    this.pedalsStateSubscription = this.pedalsService.pedalsState$
       .subscribe((pedalsState: number) => {
         if (pedalsState > 0) {
           this.accelerate(pedalsState);

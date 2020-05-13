@@ -1,11 +1,12 @@
 import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
+import { withLatestFrom } from 'rxjs/operators';
+
 import { LeftPaddleService } from '../paddles/left-paddle.service';
 import { RightPaddleService } from '../paddles/right-paddle.service';
 import { GearboxService } from '../gearbox/gearbox.service';
 import { GearboxAggressionLevel, GearboxMode, GearboxPosition, GearboxStatus } from '../gearbox/gearbox';
 import { EngineService } from '../engine/engine.service';
-import { Observable } from 'rxjs';
-import { withLatestFrom } from 'rxjs/operators';
 import { PedalsService } from '../pedals/pedals.service';
 
 @Injectable({
@@ -72,6 +73,6 @@ export class CarService {
   }
 
   public handlePedalsChange(pedalsState: number): void {
-    this.pedals.setPedalState(pedalsState);
+    this.pedals.setPedalsState(pedalsState);
   }
 }
