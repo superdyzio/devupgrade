@@ -2,17 +2,13 @@ import { Injectable, OnDestroy } from '@angular/core';
 import { BehaviorSubject, Observable, Subscription, interval } from 'rxjs';
 import { PedalsService } from '../pedals/pedals.service';
 import { map, mapTo, switchMap, tap } from 'rxjs/operators';
-import { REFRESH_STATE_INTERVAL_MS } from '../constants';
+import { MAX_RPM, MIN_RPM, REFRESH_STATE_INTERVAL_MS, RPM_LOSS_ON_ENGINE_BRAKE, RPM_STEP } from '../constants';
 
 @Injectable({
   providedIn: 'root'
 })
 export class EngineService implements OnDestroy {
-  private static MAX_RPM = 7000;
-  private static MIN_RPM = 500;
-  private static RPM_STEP = 500;
-  private static RPM_LOSS_ON_ENGINE_BRAKE = 200;
-  private currentRpm: number = EngineService.MIN_RPM;
+  private currentRpm = 0;
   private pedalsStateSubscription: Subscription;
   public currentRpm$: Observable<number> = interval(REFRESH_STATE_INTERVAL_MS)
     .pipe(map(() => this.currentRpm));
@@ -34,39 +30,43 @@ export class EngineService implements OnDestroy {
     this.pedalsStateSubscription.unsubscribe();
   }
 
+  public turnOn(): void {
+    this.setCurrentRpm(MIN_RPM);
+  }
+
+  public turnOff(): void {
+    this.setCurrentRpm(0);
+  }
+
   private accelerate(throttleLevel: number): void {
-    const rpmIncrease = throttleLevel * EngineService.RPM_STEP;
-    if (this.currentRpm + rpmIncrease <= EngineService.MAX_RPM) {
-      this.setCurrentRpm(
-        this.currentRpm + throttleLevel * EngineService.RPM_STEP
-      );
-    } else {
-      this.setCurrentRpm(EngineService.MAX_RPM);
-    }
+    this.setCurrentRpm(
+      Math.min(
+        Math.max(this.currentRpm + throttleLevel * RPM_STEP, MIN_RPM),
+        MAX_RPM
+      )
+    );
   }
 
   private decelerate(): void {
-    if (this.currentRpm - EngineService.RPM_STEP >= EngineService.MIN_RPM) {
-      this.setCurrentRpm(this.currentRpm - EngineService.RPM_STEP);
-    } else {
-      this.setCurrentRpm(EngineService.MIN_RPM);
-    }
+    this.setCurrentRpm(
+      Math.max(this.currentRpm - RPM_STEP, MIN_RPM)
+    );
   }
 
   public engineBreak(): void {
-    if (this.currentRpm - EngineService.RPM_LOSS_ON_ENGINE_BRAKE >= EngineService.MIN_RPM) {
-      this.setCurrentRpm(this.currentRpm - EngineService.RPM_LOSS_ON_ENGINE_BRAKE);
+    if (this.currentRpm - RPM_LOSS_ON_ENGINE_BRAKE >= MIN_RPM) {
+      this.setCurrentRpm(this.currentRpm - RPM_LOSS_ON_ENGINE_BRAKE);
     } else {
-      this.setCurrentRpm(EngineService.MIN_RPM);
+      this.setCurrentRpm(MIN_RPM);
     }
   }
 
   public handleGearIncreased(): void {
-    this.setCurrentRpm(this.currentRpm - 2 * EngineService.RPM_STEP);
+    this.setCurrentRpm(this.currentRpm - 2 * RPM_STEP);
   }
 
   public handleGearDecreased(): void {
-    this.setCurrentRpm(this.currentRpm + EngineService.RPM_STEP);
+    this.setCurrentRpm(this.currentRpm + RPM_STEP);
   }
 
   private setCurrentRpm(rpm: number): void {

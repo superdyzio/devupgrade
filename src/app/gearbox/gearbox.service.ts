@@ -1,8 +1,8 @@
 import { Injectable, OnDestroy } from '@angular/core';
-import { Gearbox, GearboxAggressionLevel, GearboxMode, GearboxPosition } from './gearbox';
+import { Gearbox, GearboxAggressionLevel, GearboxMode, GearboxPosition, GearboxStatus } from './gearbox';
 import { EngineService } from '../engine/engine.service';
-import { Subscription } from 'rxjs';
-import { filter, map, tap, withLatestFrom } from 'rxjs/operators';
+import { BehaviorSubject, Observable, Subscription } from 'rxjs';
+import { map, tap, withLatestFrom } from 'rxjs/operators';
 import { PedalsService } from '../pedals/pedals.service';
 import { GEARBOX_CHARACTERISTICS } from '../constants';
 
@@ -12,6 +12,8 @@ import { GEARBOX_CHARACTERISTICS } from '../constants';
 export class GearboxService implements OnDestroy {
   private gearbox: Gearbox;
   private gearboxDriver: Subscription;
+  private gearboxStatusSubject: BehaviorSubject<GearboxStatus>;
+  public gearboxStatus$: Observable<GearboxStatus>;
 
   constructor(
     private engine: EngineService,
@@ -22,19 +24,46 @@ export class GearboxService implements OnDestroy {
       GEARBOX_CHARACTERISTICS
     );
 
+    this.gearboxStatusSubject = new BehaviorSubject<GearboxStatus>({
+      position: this.gearbox.position,
+      mode: this.gearbox.mode,
+      aggressionLevel: this.gearbox.aggressionLevel,
+      currentGear: this.gearbox.currentGear
+    });
+    this.gearboxStatus$ = this.gearboxStatusSubject.asObservable();
+
     this.gearboxDriver = this.engine.currentRpm$
       .pipe(
-        filter(() => this.gearbox.isPositionDrive()),
+        tap(() => {
+          this.gearboxStatusSubject.next({
+            position: this.gearbox.position,
+            mode: this.gearbox.mode,
+            aggressionLevel: this.gearbox.aggressionLevel,
+            currentGear: this.gearbox.currentGear
+          });
+        }),
         withLatestFrom(this.pedalsService.pedalState$),
-        tap(([rpm, pedals]) => console.log(rpm, pedals, this.gearbox.currentGear)),
+        // tap(([rpm, pedals]) => console.log(rpm, pedals, this.gearbox.currentGear)),
         map(([rpm, pedals]) => ({
           rpm,
           pedals,
           kickdownGearDecreaseCount: this.gearbox.countKickdownGearDecrease(pedals),
           mode: this.gearbox.mode,
-        }))
+          position: this.gearbox.position
+        })),
       )
-      .subscribe(({rpm, pedals, kickdownGearDecreaseCount, mode}) => {
+      .subscribe(({rpm, pedals, kickdownGearDecreaseCount, mode, position}) => {
+        if (position === GearboxPosition.Parking && rpm > 0) {
+          this.engine.turnOff();
+        }
+        if (position !== GearboxPosition.Parking && rpm === 0) {
+          this.engine.turnOn();
+        }
+
+        if (position === GearboxPosition.Neutral) {
+          return;
+        }
+
         switch (mode) {
           case GearboxMode.Eco:
             pedals > 0

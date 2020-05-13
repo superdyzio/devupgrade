@@ -1,78 +1,107 @@
-<div id="controls">
-  <div>
-    <button (click)="car.pushRightPaddle()">Gear Up</button>
-    <button (click)="car.pushLeftPaddle()">Gear Down</button>
+<div class="dashboard">
+
+  <div id="controls">
+    <div>
+      <button [disabled]="!allowManualGearChange" (click)="car.pushRightPaddle()">Gear Up</button>
+      <button [disabled]="!allowManualGearChange" (click)="car.pushLeftPaddle()">Gear Down</button>
+    </div>
+
+    <div>
+      <label>
+        <input [disabled]="!isStopped" type="radio" name="gearbox-position" value="DRIVE"
+               (change)="car.setPositionToDrive()">
+        Drive
+      </label>
+      <label>
+        <input [disabled]="!isStopped" type="radio" name="gearbox-position" value="PARKING"
+               (change)="car.setPositionToParking()" checked>
+        Parking
+      </label>
+      <label>
+        <input [disabled]="!isStopped" type="radio" name="gearbox-position" value="NEUTRAL"
+               (change)="car.setPositionToNeutral()">
+        Neutral
+      </label>
+      <label>
+        <input [disabled]="!isStopped" type="radio" name="gearbox-position" value="REVERSE"
+               (change)="car.setPositionToReverse()">
+        Reverse
+      </label>
+    </div>
+
+    <div>
+      <label>
+        <input type="radio" name="gearbox-mode" value="ECO" (click)="car.setModeToEco()">
+        Eco
+      </label>
+      <label>
+        <input type="radio" name="gearbox-mode" value="COMFORT" (click)="car.setModeToComfort()" checked>
+        Comfort
+      </label>
+      <label>
+        <input type="radio" name="gearbox-mode" value="SPORT" (click)="car.setModeToSport()">
+        Sport
+      </label>
+    </div>
+
+    <div>
+      <label>
+        <input [disabled]="!allowAggressionLevelChange" type="radio" name="gearbox-aggression-level" value="1"
+               (click)="car.setAggressionLevelToLow()" checked>
+        Agg 1
+      </label>
+      <label>
+        <input [disabled]="!allowAggressionLevelChange" type="radio" name="gearbox-aggression-level" value="2"
+               (click)="car.setAggressionLevelToMedium()">
+        Agg 2
+      </label>
+      <label>
+        <input [disabled]="!allowAggressionLevelChange" type="radio" name="gearbox-aggression-level" value="3"
+               (click)="car.setAggressionLevelToHigh()">
+        Agg 3
+      </label>
+    </div>
+
+    <div>
+      <label>
+        <input [disabled]="!isStopped" type="radio" name="trailer" value="ON">
+        Przyczepa
+      </label>
+      <label>
+        <input [disabled]="!isStopped" type="radio" name="trailer" value="OFF" checked>
+        Bez przyczepy
+      </label>
+    </div>
   </div>
 
-  <div>
-    <label>
-      <input type="radio" name="gearbox-position" value="DRIVE" (change)="car.setPositionToDrive()">
-      Drive
-    </label>
-    <label>
-      <input type="radio" name="gearbox-position" value="PARKING" (change)="car.setPositionToParking()" checked>
-      Parking
-    </label>
-    <label>
-      <input type="radio" name="gearbox-position" value="NEUTRAL" (change)="car.setPositionToNeutral()">
-      Neutral
-    </label>
-    <label>
-      <input type="radio" name="gearbox-position" value="REVERSE" (change)="car.setPositionToReverse()">
-      Reverse
-    </label>
+  <div id="leftFire" class="fire" [class.shoot]="showFire">
+    <div *ngIf="!showFire">WRUM</div>
+    <div *ngIf="showFire">OGIEŃ Z DUPY</div>
+  </div>
+  <div id="gauges">
+    <gojs-diagram
+      [initDiagram]="initDiagram"
+      [nodeDataArray]="nodes"
+      divClassName="diagramDivClass"
+    ></gojs-diagram>
+    <div class="gauges-readings">
+      <div>
+        {{rpm}}<br/>
+        <b>rpm</b>
+      </div>
+      <div>
+        {{gear}}<br/>
+        <b>gear</b>
+      </div>
+    </div>
+  </div>
+  <div id="rightFire" class="fire" [class.shoot]="showFire">
+    <div *ngIf="!showFire">WRUM</div>
+    <div *ngIf="showFire">OGIEŃ Z DUPY</div>
   </div>
 
-  <div>
-    <label>
-      <input type="radio" name="gearbox-mode" value="ECO" (click)="car.setModeToEco()">
-      Eco
-    </label>
-    <label>
-      <input type="radio" name="gearbox-mode" value="COMFORT" (click)="car.setModeToComfort()" checked>
-      Comfort
-    </label>
-    <label>
-      <input type="radio" name="gearbox-mode" value="SPORT" (click)="car.setModeToSport()">
-      Sport
-    </label>
+  <div id="footer">
+    <ng5-slider [(value)]="value" [options]="options" (valueChange)="car.handlePedalsChange($event)"></ng5-slider>
   </div>
 
-  <div>
-    <label>
-      <input type="radio" name="gearbox-aggression-level" value="1" (click)="car.setAggressionLevelToLow()" checked>
-      Agg 1
-    </label>
-    <label>
-      <input type="radio" name="gearbox-aggression-level" value="2" (click)="car.setAggressionLevelToMedium()">
-      Agg 2
-    </label>
-    <label>
-      <input type="radio" name="gearbox-aggression-level" value="3" (click)="car.setAggressionLevelToHigh()">
-      Agg 3
-    </label>
-  </div>
-
-  <div>
-    <label>
-      <input type="radio" name="trailer" value="ON">
-      Przyczepa
-    </label>
-    <label>
-      <input type="radio" name="trailer" value="OFF" checked>
-      Bez przyczepy
-    </label>
-  </div>
-</div>
-
-<div id="leftFire">OGIEŃ Z DUPY</div>
-<div id="gauges">LICZNIKI</div>
-<div id="rightFire">OGIEŃ Z DUPY</div>
-
-<div id="footer">
-  IWONKA JEST SUPER
-  <div>
-    <button (click)="car.pushBrakePedal()">Brake start</button>
-    <button (click)="car.pushThrottlePedal()">Throttle start</button>
-  </div>
 </div>

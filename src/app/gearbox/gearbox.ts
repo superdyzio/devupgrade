@@ -18,6 +18,13 @@ export enum GearboxAggressionLevel {
   High = 3,
 }
 
+export interface GearboxStatus {
+  position: GearboxPosition;
+  mode: GearboxMode;
+  aggressionLevel: GearboxAggressionLevel;
+  currentGear: number;
+}
+
 interface GearboxKickdownCharacteristics {
   decreaseGearMaxRpmLevel: number;
   maxThrottleLevel: number | null;

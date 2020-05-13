@@ -7,6 +7,8 @@ import { PaddlesModule } from '../paddles/paddles.module';
 import { PedalsModule } from '../pedals/pedals.module';
 import { TrailerModule } from '../trailer/trailer.module';
 import { DashboardComponent } from './dashboard/dashboard.component';
+import { GojsAngularModule } from 'gojs-angular';
+import { Ng5SliderModule } from 'ng5-slider';
 
 @NgModule({
     declarations: [DashboardComponent],
@@ -20,7 +22,9 @@ import { DashboardComponent } from './dashboard/dashboard.component';
         LightsModule,
         PaddlesModule,
         PedalsModule,
-        TrailerModule
+        TrailerModule,
+        GojsAngularModule,
+        Ng5SliderModule
     ]
 })
 export class CarModule { }
