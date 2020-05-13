@@ -76,7 +76,7 @@ export class Gearbox {
   }
 
   public getMaxThrottleLevel(): number {
-    return this.characteristics[this.mode].throttle.maxThrottleLevel;
+    return this.characteristics[this.mode].throttle.maxThrottleLevel || 1;
   }
 
   public setGearboxPosition(gearboxPosition: GearboxPosition): void {

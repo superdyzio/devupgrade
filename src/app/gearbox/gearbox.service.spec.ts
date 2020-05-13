@@ -13,4 +13,11 @@ describe('GearboxService', () => {
   it('should be created', () => {
     expect(service).toBeTruthy();
   });
+
+  describe('eco mode', () => {
+
+    it('should', () => {
+
+    });
+  });
 });
