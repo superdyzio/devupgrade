@@ -72,15 +72,4 @@ export class CarService {
     value = Math.max(Math.min(value, 1), -1);
     this.pedals.setPedalState(value);
   }
-  public pushThrottlePedal(): void {
-    this.throttle.push();
-  }
-
-  public pushBrakePedal(): void {
-    this.brake.push();
-  }
-
-  public releasePedals(): void {
-    this.pedals.setPedalState(0);
-  }
 }

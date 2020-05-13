@@ -12,7 +12,7 @@ import { GEARBOX_CHARACTERISTICS } from '../constants';
 export class GearboxService implements OnDestroy {
   private gearbox: Gearbox;
   private gearboxDriver: Subscription;
-  private isKickDown: boolean;
+  private isKickdown: boolean;
   private kickdownDecreaseCounter: number = null;
 
   constructor(
@@ -24,40 +24,19 @@ export class GearboxService implements OnDestroy {
     this.gearboxDriver = this.pedalsService.pedalState$
       .pipe(
         filter(() => this.gearbox.isPositionDrive()),
-        tap(pedals => this.setKickDownFlags(pedals)),
+        tap(pedals => this.setKickdownFlags(pedals)),
         withLatestFrom(this.engine.currentRpm$),
         tap(([pedals, rpm]) => console.log(rpm, pedals, this.gearbox.currentGear)),
-        map(([pedals, rpm]) => ({
-          pedals,
-          rpm,
-          mode: this.gearbox.mode,
-        }))
       )
-      .subscribe(({rpm, pedals, mode}) => {
-
+      .subscribe(([pedals, rpm]) => {
         if (this.pedalsService.arePedalsReleased()) {
           this.handleEngineBraking(rpm);
-          return;
-        }
-
-        switch (mode) {
-          case GearboxMode.Eco:
-            pedals > 0
-              ? this.handleThrottleOnEco(rpm)
-              : this.handleBrakeOnEco(rpm);
-            break;
-          case GearboxMode.Comfort:
-            pedals > 0
-              ? this.handleThrottle(rpm, pedals)
-              : this.handleBrake(rpm);
-            break;
-          case GearboxMode.Sport:
-            pedals > 0
-              ? this.handleThrottle(rpm, pedals)
-              : this.handleBrake(rpm);
-            break;
-          default:
-            console.error(`Wrong gearbox mode: ${mode}`);
+        } else if (this.isKickdown) {
+          this.handleKickdown(rpm, pedals);
+        } else {
+          pedals > 0
+            ? this.handleThrottle(rpm)
+            : this.handleBrake(rpm);
         }
       });
   }
@@ -90,12 +69,12 @@ export class GearboxService implements OnDestroy {
     }
   }
 
-  private setKickDownFlags(pedals: number): void {
-    const isKickDown = pedals > this.gearbox.getMaxThrottleLevel();
-    if (isKickDown && isKickDown !== this.isKickDown) {
+  private setKickdownFlags(pedals: number): void {
+    const isKickdown = pedals > this.gearbox.getMaxThrottleLevel();
+    if (isKickdown && isKickdown !== this.isKickdown) {
       this.kickdownDecreaseCounter = this.gearbox.countKickdownGearDecrease(pedals);
     }
-    this.isKickDown = pedals > this.gearbox.getMaxThrottleLevel();
+    this.isKickdown = pedals > this.gearbox.getMaxThrottleLevel();
   }
 
   private handleEngineBraking(rpm: number): void {
@@ -108,7 +87,7 @@ export class GearboxService implements OnDestroy {
     }
   }
 
-  private handleThrottleOnEco(rpm: number): void {
+  private handleThrottle(rpm): void {
     if (rpm >= this.gearbox.getIncreaseGearRpmLevel() && this.gearbox.increaseGear()) {
       this.engine.handleGearIncreased();
     } else if (rpm < this.gearbox.getDecreaseGearRpmLevel() && this.gearbox.decreaseGear()) {
@@ -116,30 +95,16 @@ export class GearboxService implements OnDestroy {
     }
   }
 
-  private handleBrakeOnEco(rpm: number): void {
-    if (rpm < this.gearbox.getDecreaseGearRpmLevel(true) && this.gearbox.decreaseGear()) {
-      this.engine.handleGearDecreased();
-    }
-  }
-
-  private handleThrottle(rpm, pedals): void {
-    if (this.isKickDown) {
-      const kickDownDecreaseGearMaxRpmLevel = this.gearbox.getKickdownDecreaseGearMaxRpmLevel(pedals);
-      if (this.kickdownDecreaseCounter > 0 && rpm <= kickDownDecreaseGearMaxRpmLevel) {
-        this.kickdownDecreaseCounter--;
-        if (this.gearbox.decreaseGear()) {
-          this.engine.handleGearDecreased();
-        }
-      } else if (rpm > kickDownDecreaseGearMaxRpmLevel && this.gearbox.increaseGear()) {
-        this.kickdownDecreaseCounter--;
-        this.engine.handleGearIncreased();
-      }
-    } else {
-      if (rpm >= this.gearbox.getIncreaseGearRpmLevel() && this.gearbox.increaseGear()) {
-        this.engine.handleGearIncreased();
-      } else if (rpm < this.gearbox.getDecreaseGearRpmLevel() && this.gearbox.decreaseGear()) {
+  private handleKickdown(rpm: number, pedals: number): void {
+    const kickdownDecreaseGearMaxRpmLevel = this.gearbox.getKickdownDecreaseGearMaxRpmLevel(pedals);
+    if (this.kickdownDecreaseCounter > 0 && rpm <= kickdownDecreaseGearMaxRpmLevel) {
+      this.kickdownDecreaseCounter--;
+      if (this.gearbox.decreaseGear()) {
         this.engine.handleGearDecreased();
       }
+    } else if (rpm > kickdownDecreaseGearMaxRpmLevel && this.gearbox.increaseGear()) {
+      this.kickdownDecreaseCounter--;
+      this.engine.handleGearIncreased();
     }
   }
 

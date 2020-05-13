@@ -20,7 +20,7 @@ export class EngineService implements OnDestroy {
         if (pedalsState > 0) {
           this.accelerate(pedalsState);
         } else if (pedalsState < 0) {
-          this.decelerate();
+          this.decelerate(pedalsState);
         } else {
           this.engineBreak();
         }
@@ -42,9 +42,10 @@ export class EngineService implements OnDestroy {
     }
   }
 
-  private decelerate(): void {
-    if (this.currentRpm - EngineService.RPM_STEP >= EngineService.MIN_RPM) {
-      this.setCurrentRpm(this.currentRpm - EngineService.RPM_STEP);
+  private decelerate(brakeLevel: number): void {
+    const rpmDecrease = Math.abs(brakeLevel) * EngineService.RPM_STEP;
+    if (this.currentRpm - rpmDecrease >= EngineService.MIN_RPM) {
+      this.setCurrentRpm(this.currentRpm - rpmDecrease);
     } else {
       this.setCurrentRpm(EngineService.MIN_RPM);
     }
@@ -59,11 +60,11 @@ export class EngineService implements OnDestroy {
   }
 
   public handleGearIncreased(): void {
-    this.setCurrentRpm(this.currentRpm - this.currentRpm * .3);
+    this.setCurrentRpm(Math.floor(this.currentRpm - this.currentRpm * .5));
   }
 
   public handleGearDecreased(): void {
-    this.setCurrentRpm(this.currentRpm + this.currentRpm * .3);
+    this.setCurrentRpm(Math.floor(this.currentRpm + this.currentRpm * .3));
   }
 
   private get currentRpm(): number {
