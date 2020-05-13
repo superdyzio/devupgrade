@@ -8,13 +8,18 @@ import { MAX_RPM, MIN_RPM, RPM_LOSS_ON_ENGINE_BRAKE, RPM_STEP } from '../constan
   providedIn: 'root'
 })
 export class EngineService implements OnDestroy {
-  private currentRpmSubject: BehaviorSubject<number> = new BehaviorSubject<number>(MIN_RPM);
+  private isWorking = false;
+  private currentRpmSubject: BehaviorSubject<number> = new BehaviorSubject<number>(0);
   private pedalsStateSubscription: Subscription;
   public currentRpm$: Observable<number> = this.currentRpmSubject.asObservable();
 
-  constructor(private pedalsService: PedalsService) {
-    this.pedalsStateSubscription = this.pedalsService.pedalsState$
+  constructor(private pedals: PedalsService) {
+    this.pedalsStateSubscription = this.pedals.pedalsState$
       .subscribe((pedalsState: number) => {
+        if (!this.isWorking) {
+          return;
+        }
+
         if (pedalsState > 0) {
           this.accelerate(pedalsState);
         } else if (pedalsState < 0) {
@@ -31,10 +36,12 @@ export class EngineService implements OnDestroy {
 
   public turnOn(): void {
     this.setCurrentRpm(MIN_RPM);
+    this.isWorking = true;
   }
 
   public turnOff(): void {
     this.setCurrentRpm(0);
+    this.isWorking = false;
   }
 
   private accelerate(throttleLevel: number): void {

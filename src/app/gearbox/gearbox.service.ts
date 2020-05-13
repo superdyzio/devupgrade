@@ -20,7 +20,7 @@ export class GearboxService implements OnDestroy {
 
   constructor(
     private engine: EngineService,
-    private pedalsService: PedalsService
+    private pedals: PedalsService
   ) {
     this.gearbox = new Gearbox(6, GEARBOX_CHARACTERISTICS);
 
@@ -32,7 +32,7 @@ export class GearboxService implements OnDestroy {
     });
     this.gearboxStatus$ = this.gearboxStatusSubject.asObservable();
 
-    this.gearboxDriver = this.pedalsService.pedalsState$
+    this.gearboxDriver = this.pedals.pedalsState$
       .pipe(
         tap(() => {
           this.gearboxStatusSubject.next({
@@ -44,21 +44,20 @@ export class GearboxService implements OnDestroy {
         }),
         tap(pedalsState => this.setKickdownFlags(pedalsState)),
         withLatestFrom(this.engine.currentRpm$),
-        tap(([pedalsState, rpm]) => console.log(rpm, pedalsState, this.gearbox.currentGear)),
       )
       .subscribe(([pedalsState, rpm]) => {
-        if (this.position === GearboxPosition.Parking && rpm > 0) {
+        if (this.gearbox.isPositionParking() && rpm > 0) {
           this.engine.turnOff();
         }
-        if (this.position !== GearboxPosition.Parking && rpm === 0) {
+        if (!this.gearbox.isPositionParking() && rpm === 0) {
           this.engine.turnOn();
         }
 
-        if (this.position === GearboxPosition.Neutral) {
+        if (this.gearbox.isPositionNeutral() || this.gearbox.isPositionParking()) {
           return;
         }
 
-        if (this.pedalsService.arePedalsReleased()) {
+        if (this.pedals.arePedalsReleased()) {
           this.handleEngineBraking(rpm);
         } else if (this.isKickdown) {
           this.handleKickdown(rpm, pedalsState);
@@ -68,10 +67,6 @@ export class GearboxService implements OnDestroy {
             : this.handleBrake(rpm);
         }
       });
-  }
-
-  public get position(): GearboxPosition {
-    return this.gearboxStatusSubject.value.position;
   }
 
   public ngOnDestroy() {

@@ -100,6 +100,14 @@ export class Gearbox {
     return this.position === GearboxPosition.Drive;
   }
 
+  public isPositionParking(): boolean {
+    return this.position === GearboxPosition.Parking;
+  }
+
+  public isPositionNeutral(): boolean {
+    return this.position === GearboxPosition.Neutral;
+  }
+
   public countKickdownGearDecrease(
     pedalsState: number,
     kickdownCharacteristics: GearboxKickdownCharacteristics | GearboxThrottleCharacteristics = this.characteristics[this.mode].throttle
@@ -123,7 +131,7 @@ export class Gearbox {
   }
 
   public increaseGear(): boolean {
-    if (this.currentGear === this.maxGear) {
+    if (!this.currentGear || this.currentGear === this.maxGear) {
       return false;
     }
 
@@ -133,7 +141,7 @@ export class Gearbox {
   }
 
   public decreaseGear(): boolean {
-    if (this.currentGear === 1) {
+    if (!this.currentGear || this.currentGear === 1) {
       return false;
     }
 
