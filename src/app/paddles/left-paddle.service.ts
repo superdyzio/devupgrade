@@ -7,10 +7,10 @@ import { GearboxService } from '../gearbox/gearbox.service';
   providedIn: 'root'
 })
 export class LeftPaddleService implements Paddle {
-  constructor(private gearbox: GearboxService) {
+  constructor(private gearboxDriver: GearboxService) {
   }
 
   public push(): void {
-    this.gearbox.decreaseGearManually();
+    this.gearboxDriver.decreaseGearManually();
   }
 }

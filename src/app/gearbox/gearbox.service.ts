@@ -2,10 +2,12 @@ import { Injectable, OnDestroy } from '@angular/core';
 import { tap, withLatestFrom } from 'rxjs/operators';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 
-import { Gearbox, GearboxAggressionLevel, GearboxMode, GearboxPosition, GearboxStatus } from './gearbox';
+import { Gearbox } from './gearbox';
 import { EngineService } from '../engine/engine.service';
 import { PedalsService } from '../pedals/pedals.service';
 import { GEARBOX_CHARACTERISTICS } from '../constants';
+import { GearboxStatus } from '../interfaces';
+import { GearboxAggressionLevel, GearboxMode, GearboxPosition } from '../enums';
 
 @Injectable({
   providedIn: 'root'
@@ -13,8 +15,8 @@ import { GEARBOX_CHARACTERISTICS } from '../constants';
 export class GearboxService implements OnDestroy {
   public gearboxStatus$: Observable<GearboxStatus>;
   private gearboxStatusSubject: BehaviorSubject<GearboxStatus>;
-  private gearbox: Gearbox;
-  private gearboxDriver: Subscription;
+  private readonly gearbox: Gearbox;
+  private pedalsStateSubscription: Subscription;
   private isKickdown: boolean;
   private kickdownDecreaseCounter: number = null;
 
@@ -23,25 +25,12 @@ export class GearboxService implements OnDestroy {
     private pedals: PedalsService
   ) {
     this.gearbox = new Gearbox(6, GEARBOX_CHARACTERISTICS);
-
-    this.gearboxStatusSubject = new BehaviorSubject<GearboxStatus>({
-      position: this.gearbox.position,
-      mode: this.gearbox.mode,
-      aggressionLevel: this.gearbox.aggressionLevel,
-      currentGear: this.gearbox.currentGear
-    });
+    this.gearboxStatusSubject = new BehaviorSubject<GearboxStatus>(this.getCurrentGearboxStatus());
     this.gearboxStatus$ = this.gearboxStatusSubject.asObservable();
 
-    this.gearboxDriver = this.pedals.pedalsState$
+    this.pedalsStateSubscription = this.pedals.pedalsState$
       .pipe(
-        tap(() => {
-          this.gearboxStatusSubject.next({
-            position: this.gearbox.position,
-            mode: this.gearbox.mode,
-            aggressionLevel: this.gearbox.aggressionLevel,
-            currentGear: this.gearbox.currentGear
-          });
-        }),
+        tap(() => this.setCurrentGearboxStatus()),
         tap(pedalsState => this.setKickdownFlags(pedalsState)),
         withLatestFrom(this.engine.currentRpm$),
       )
@@ -70,7 +59,7 @@ export class GearboxService implements OnDestroy {
   }
 
   public ngOnDestroy() {
-    this.gearboxDriver.unsubscribe();
+    this.pedalsStateSubscription.unsubscribe();
   }
 
   public handleGearboxPositionChange(gearboxPosition: GearboxPosition): void {
@@ -95,6 +84,23 @@ export class GearboxService implements OnDestroy {
     if (this.gearbox.isPositionDrive() && this.gearbox.decreaseGear()) {
       this.engine.handleGearDecreased();
     }
+  }
+
+  public get gearboxStatus(): GearboxStatus {
+    return this.gearboxStatusSubject.value;
+  }
+
+  private getCurrentGearboxStatus(): GearboxStatus {
+    const {position, mode, aggressionLevel, currentGear}: Gearbox = this.gearbox;
+    return {
+      position, mode, aggressionLevel, currentGear,
+      allowManualGearChange: position === GearboxPosition.Drive,
+      allowAggressionLevelChange: mode === GearboxMode.Sport,
+    };
+  }
+
+  private setCurrentGearboxStatus(): void {
+    this.gearboxStatusSubject.next(this.getCurrentGearboxStatus());
   }
 
   private setKickdownFlags(pedalsState: number): void {

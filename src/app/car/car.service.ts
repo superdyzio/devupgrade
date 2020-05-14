@@ -5,63 +5,75 @@ import { withLatestFrom } from 'rxjs/operators';
 import { LeftPaddleService } from '../paddles/left-paddle.service';
 import { RightPaddleService } from '../paddles/right-paddle.service';
 import { GearboxService } from '../gearbox/gearbox.service';
-import { GearboxAggressionLevel, GearboxMode, GearboxPosition, GearboxStatus } from '../gearbox/gearbox';
 import { EngineService } from '../engine/engine.service';
 import { PedalsService } from '../pedals/pedals.service';
+import { GearboxStatus } from '../interfaces';
+import { GearboxAggressionLevel, GearboxMode, GearboxPosition } from '../enums';
+import { MIN_RPM } from '../constants';
 
 @Injectable({
   providedIn: 'root'
 })
 export class CarService {
-  public dashboardData$: Observable<[GearboxStatus, number]> = this.gearbox.gearboxStatus$
+  public dashboardData$: Observable<[GearboxStatus, number]> = this.gearboxDriver.gearboxStatus$
     .pipe(withLatestFrom(this.engine.currentRpm$));
 
   constructor(
     private engine: EngineService,
-    private gearbox: GearboxService,
+    private gearboxDriver: GearboxService,
     private leftPaddle: LeftPaddleService,
     private rightPaddle: RightPaddleService,
     private pedals: PedalsService
-  ) { }
+  ) {
+  }
+
+  public isCarStopped(): boolean {
+    const gearboxStatus = this.gearboxDriver.gearboxStatus;
+    const rpm = this.engine.currentRpm;
+
+    return gearboxStatus.position === GearboxPosition.Parking
+      || gearboxStatus.position === GearboxPosition.Neutral && rpm === MIN_RPM
+      || ((gearboxStatus.currentGear === 1 || gearboxStatus.position === GearboxPosition.Reverse) && rpm === MIN_RPM);
+  }
 
   public setPositionToParking(): void {
-    this.gearbox.handleGearboxPositionChange(GearboxPosition.Parking);
+    this.gearboxDriver.handleGearboxPositionChange(GearboxPosition.Parking);
   }
 
   public setPositionToNeutral(): void {
-    this.gearbox.handleGearboxPositionChange(GearboxPosition.Neutral);
+    this.gearboxDriver.handleGearboxPositionChange(GearboxPosition.Neutral);
   }
 
   public setPositionToReverse(): void {
-    this.gearbox.handleGearboxPositionChange(GearboxPosition.Reverse);
+    this.gearboxDriver.handleGearboxPositionChange(GearboxPosition.Reverse);
   }
 
   public setPositionToDrive(): void {
-    this.gearbox.handleGearboxPositionChange(GearboxPosition.Drive);
+    this.gearboxDriver.handleGearboxPositionChange(GearboxPosition.Drive);
   }
 
   public setModeToEco(): void {
-    this.gearbox.handleGearboxModeChange(GearboxMode.Eco);
+    this.gearboxDriver.handleGearboxModeChange(GearboxMode.Eco);
   }
 
   public setModeToComfort(): void {
-    this.gearbox.handleGearboxModeChange(GearboxMode.Comfort);
+    this.gearboxDriver.handleGearboxModeChange(GearboxMode.Comfort);
   }
 
   public setModeToSport(): void {
-    this.gearbox.handleGearboxModeChange(GearboxMode.Sport);
+    this.gearboxDriver.handleGearboxModeChange(GearboxMode.Sport);
   }
 
   public setAggressionLevelToLow(): void {
-    this.gearbox.handleGearboxAggressionLevelChange(GearboxAggressionLevel.Low);
+    this.gearboxDriver.handleGearboxAggressionLevelChange(GearboxAggressionLevel.Low);
   }
 
   public setAggressionLevelToMedium(): void {
-    this.gearbox.handleGearboxAggressionLevelChange(GearboxAggressionLevel.Medium);
+    this.gearboxDriver.handleGearboxAggressionLevelChange(GearboxAggressionLevel.Medium);
   }
 
   public setAggressionLevelToHigh(): void {
-    this.gearbox.handleGearboxAggressionLevelChange(GearboxAggressionLevel.High);
+    this.gearboxDriver.handleGearboxAggressionLevelChange(GearboxAggressionLevel.High);
   }
 
   public pushLeftPaddle(): void {

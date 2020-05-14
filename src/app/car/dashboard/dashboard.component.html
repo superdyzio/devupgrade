@@ -8,7 +8,7 @@
 
     <div>
       <label>
-        <input [disabled]="!isStopped"
+        <input [disabled]="!isCarStopped"
                (change)="car.setPositionToDrive()"
                type="radio"
                name="gearbox-position"
@@ -17,7 +17,7 @@
         Drive
       </label>
       <label>
-        <input [disabled]="!isStopped"
+        <input [disabled]="!isCarStopped"
                (change)="car.setPositionToParking()"
                checked
                type="radio"
@@ -27,7 +27,7 @@
         Parking
       </label>
       <label>
-        <input [disabled]="!isStopped"
+        <input [disabled]="!isCarStopped"
                (change)="car.setPositionToNeutral()"
                type="radio"
                name="gearbox-position"
@@ -36,7 +36,7 @@
         Neutral
       </label>
       <label>
-        <input [disabled]="!isStopped"
+        <input [disabled]="!isCarStopped"
                (change)="car.setPositionToReverse()"
                type="radio"
                name="gearbox-position"
@@ -94,11 +94,11 @@
 
     <div>
       <label>
-        <input [disabled]="!isStopped" type="radio" name="trailer" value="ON">
+        <input [disabled]="!isCarStopped" type="radio" name="trailer" value="ON">
         Przyczepa
       </label>
       <label>
-        <input [disabled]="!isStopped" type="radio" name="trailer" value="OFF" checked>
+        <input [disabled]="!isCarStopped" type="radio" name="trailer" value="OFF" checked>
         Bez przyczepy
       </label>
     </div>
