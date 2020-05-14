@@ -5,9 +5,10 @@ import { withLatestFrom } from 'rxjs/operators';
 import { LeftPaddleService } from '../paddles/left-paddle.service';
 import { RightPaddleService } from '../paddles/right-paddle.service';
 import { GearboxService } from '../gearbox/gearbox.service';
-import { GearboxAggressionLevel, GearboxMode, GearboxPosition, GearboxStatus } from '../gearbox/gearbox';
 import { EngineService } from '../engine/engine.service';
 import { PedalsService } from '../pedals/pedals.service';
+import { GearboxStatus } from '../interfaces';
+import { GearboxAggressionLevel, GearboxMode, GearboxPosition } from '../enums';
 
 @Injectable({
   providedIn: 'root'
@@ -22,7 +23,8 @@ export class CarService {
     private leftPaddle: LeftPaddleService,
     private rightPaddle: RightPaddleService,
     private pedals: PedalsService
-  ) { }
+  ) {
+  }
 
   public setPositionToParking(): void {
     this.gearbox.handleGearboxPositionChange(GearboxPosition.Parking);

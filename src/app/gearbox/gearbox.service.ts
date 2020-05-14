@@ -2,10 +2,12 @@ import { Injectable, OnDestroy } from '@angular/core';
 import { tap, withLatestFrom } from 'rxjs/operators';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 
-import { Gearbox, GearboxAggressionLevel, GearboxMode, GearboxPosition, GearboxStatus } from './gearbox';
+import { Gearbox } from './gearbox';
 import { EngineService } from '../engine/engine.service';
 import { PedalsService } from '../pedals/pedals.service';
 import { GEARBOX_CHARACTERISTICS } from '../constants';
+import { GearboxStatus } from '../interfaces';
+import { GearboxAggressionLevel, GearboxMode, GearboxPosition } from '../enums';
 
 @Injectable({
   providedIn: 'root'
@@ -35,6 +37,7 @@ export class GearboxService implements OnDestroy {
     this.gearboxDriver = this.pedals.pedalsState$
       .pipe(
         tap(() => {
+          // TODO move to method
           this.gearboxStatusSubject.next({
             position: this.gearbox.position,
             mode: this.gearbox.mode,

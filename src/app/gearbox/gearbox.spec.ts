@@ -1,5 +1,6 @@
-import { Gearbox, GearboxAggressionLevel, GearboxMode, GearboxPosition } from './gearbox';
+import { Gearbox } from './gearbox';
 import { GEARBOX_CHARACTERISTICS } from '../constants';
+import { GearboxAggressionLevel, GearboxMode, GearboxPosition } from '../enums';
 
 describe('Gearbox', () => {
   let gearbox: Gearbox;

@@ -3,9 +3,10 @@ import * as go from 'gojs';
 import { Subscription } from 'rxjs';
 
 import { CarService } from '../car.service';
-import { GearboxAggressionLevel, GearboxMode, GearboxPosition, GearboxStatus } from '../../gearbox/gearbox';
 import { GEARBOX_GEAR_SYMBOL_MAP, MIN_RPM } from '../../constants';
 import { filter } from 'rxjs/operators';
+import { GearboxAggressionLevel, GearboxMode, GearboxPosition } from '../../enums';
+import { GearboxStatus } from '../../interfaces';
 
 let diagram: go.Diagram;
 
@@ -39,12 +40,12 @@ export class DashboardComponent implements OnDestroy, AfterContentInit {
   public ngAfterContentInit() {
     this.dashboardDataSubscription = this.car.dashboardData$
       .pipe(filter(() => !!diagram))
-
       .subscribe(([gearboxStatus, rpm]: [GearboxStatus, number]) => {
         this.rpm = rpm;
         this.previousGear = typeof this.gear === 'number' ? this.gear : 0;
         this.gear = GEARBOX_GEAR_SYMBOL_MAP[gearboxStatus.position] || gearboxStatus.currentGear;
         if (
+          // TODO optimize
           !this.showFire
           && gearboxStatus.aggressionLevel === GearboxAggressionLevel.High
           && !!this.previousGear
@@ -54,8 +55,11 @@ export class DashboardComponent implements OnDestroy, AfterContentInit {
           this.shootFire();
         }
 
+        // todo move to gerboxStatus
         this.allowManualGearChange = gearboxStatus.position === GearboxPosition.Drive;
         this.allowAggressionLevelChange = gearboxStatus.mode === GearboxMode.Sport;
+
+        // todo: move to car service method
         this.isStopped = gearboxStatus.position === GearboxPosition.Neutral && rpm === MIN_RPM
           || gearboxStatus.position === GearboxPosition.Parking
           || ((gearboxStatus.currentGear === 1 || gearboxStatus.position === GearboxPosition.Reverse) && rpm === MIN_RPM);
