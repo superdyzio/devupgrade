@@ -19,7 +19,7 @@ fdescribe('GearboxService', () => {
     engineMock = {
       ...jasmine.createSpyObj(
         'EngineService',
-        ['handleGearIncreased', 'handleGearDecreased', 'handleEngineBreak', 'engineBreak', 'handleBrake']
+        ['handleGearIncreased', 'handleGearDecreased', 'handleEngineBrake', 'engineBrake', 'handleBrake']
       ),
       currentRpm$: engineCurrentRpmSubject.asObservable()
     };
@@ -238,11 +238,11 @@ fdescribe('GearboxService', () => {
         expect(engineMock.handleGearDecreased).toHaveBeenCalled();
       });
 
-      it('should call engine.engineBreak if rpm less than brake decrease level and gear is 1', () => {
+      it('should call engine.engineBrake if rpm less than brake decrease level and gear is 1', () => {
         service['gearbox'].currentGear = 1;
         service['handleEngineBraking'](brakeDecreaseGearRpmLevel - 1);
 
-        expect(engineMock.engineBreak).toHaveBeenCalled();
+        expect(engineMock.engineBrake).toHaveBeenCalled();
       });
 
       it('should not call engine.handleGearDecreased if rpm greater or equal then brake decrease level', () => {
@@ -329,11 +329,11 @@ fdescribe('GearboxService', () => {
         expect(engineMock.handleGearDecreased).toHaveBeenCalled();
       });
 
-      it('should call engine.engineBreak if rpm less than brake decrease level and gear is 1', () => {
+      it('should call engine.engineBrake if rpm less than brake decrease level and gear is 1', () => {
         service['gearbox'].currentGear = 1;
         service['handleEngineBraking'](brakeDecreaseGearRpmLevel - 1);
 
-        expect(engineMock.engineBreak).toHaveBeenCalled();
+        expect(engineMock.engineBrake).toHaveBeenCalled();
       });
 
       it('should not call engine.handleGearDecreased if rpm greater or equal then brake decrease level', () => {
@@ -469,11 +469,11 @@ fdescribe('GearboxService', () => {
         expect(engineMock.handleGearDecreased).toHaveBeenCalled();
       });
 
-      it('should call engine.engineBreak if rpm less than brake decrease level and gear is 1', () => {
+      it('should call engine.engineBrake if rpm less than brake decrease level and gear is 1', () => {
         service['gearbox'].currentGear = 1;
         service['handleEngineBraking'](brakeDecreaseGearRpmLevel - 1);
 
-        expect(engineMock.engineBreak).toHaveBeenCalled();
+        expect(engineMock.engineBrake).toHaveBeenCalled();
       });
 
       it('should not call engine.handleGearDecreased if rpm greater or equal than brake decrease level', () => {
