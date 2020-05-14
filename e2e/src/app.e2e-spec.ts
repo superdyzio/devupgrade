@@ -1,13 +1,11 @@
 import { browser, logging } from 'protractor';
 
 import { AppPage } from './app.po';
-import { GearboxAggressionLevel, GearboxMode, GearboxPosition } from '../../src/app/gearbox/gearbox';
+import { GearboxAggressionLevel, GearboxMode, GearboxPosition } from '../../src/app/enums';
 
 describe('workspace-project App', () => {
   const rpmGaugeTag = 'gojs-diagram';
   const sliderTag = 'ng5-slider';
-  const gearUpButtonContent = 'Gear Up';
-  const gearDownButtonContent = 'Gear Down';
   let page: AppPage;
 
   beforeEach(async () => {

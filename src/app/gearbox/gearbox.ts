@@ -1,64 +1,6 @@
-export enum GearboxPosition {
-  Parking = 'PARKING',
-  Neutral = 'NEUTRAL',
-  Reverse = 'REVERSE',
-  Drive = 'DRIVE',
-}
-
-export enum GearboxMode {
-  Eco = 'ECO',
-  Comfort = 'COMFORT',
-  Sport = 'SPORT',
-}
-
-export enum GearboxAggressionLevel {
-  Low = 1,
-  Medium = 2,
-  High = 3,
-}
-
-const AGGRESSION_MULTIPLIER_MAP = {
-  [GearboxMode.Eco]: 1,
-  [GearboxMode.Comfort]: 1,
-  [GearboxMode.Sport]: {
-    [GearboxAggressionLevel.Low]: 1,
-    [GearboxAggressionLevel.Medium]: 1.3,
-    [GearboxAggressionLevel.High]: 1.3,
-  }
-};
-
-export interface GearboxStatus {
-  position: GearboxPosition;
-  mode: GearboxMode;
-  aggressionLevel: GearboxAggressionLevel;
-  currentGear: number;
-}
-
-interface GearboxKickdownCharacteristics {
-  decreaseGearMaxRpmLevel: number;
-  maxThrottleLevel: number | null;
-  nextLevelKickdown: GearboxKickdownCharacteristics | null;
-}
-
-interface GearboxThrottleCharacteristics {
-  increaseGearRpmLevel: number;
-  decreaseGearRpmLevel: number;
-  maxThrottleLevel: number | null;
-  nextLevelKickdown?: GearboxKickdownCharacteristics;
-}
-
-interface GearboxBrakeCharacteristics {
-  decreaseGearRpmLevel: number;
-}
-
-interface GearboxModeCharacteristics {
-  throttle: GearboxThrottleCharacteristics;
-  brake: GearboxBrakeCharacteristics;
-}
-
-export type GearboxCharacteristics = {
-  [key in GearboxMode]: GearboxModeCharacteristics;
-};
+import { AGGRESSION_MULTIPLIER_MAP } from '../constants';
+import { GearboxAggressionLevel, GearboxMode, GearboxPosition } from '../enums';
+import { GearboxCharacteristics, GearboxKickdownCharacteristics, GearboxThrottleCharacteristics } from '../interfaces';
 
 export class Gearbox {
   public constructor(
@@ -72,7 +14,7 @@ export class Gearbox {
   }
 
   public getIncreaseGearRpmLevel(): number {
-    return this.characteristics[this.mode].throttle.increaseGearRpmLevel;
+    return this.characteristics[this.mode].throttle.increaseGearRpmLevel * this.getAggressionMultiplier();
   }
 
   public getDecreaseGearRpmLevel(isBraking: boolean = false): number {

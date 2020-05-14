@@ -1,5 +1,5 @@
 import { browser, by, WebElementPromise, promise } from 'protractor';
-import { GearboxAggressionLevel, GearboxMode, GearboxPosition } from '../../src/app/gearbox/gearbox';
+import { GearboxAggressionLevel, GearboxMode, GearboxPosition } from '../../src/app/enums';
 
 export class AppPage {
   navigateTo(): Promise<unknown> {

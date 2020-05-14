@@ -1,5 +1,9 @@
-import { GearboxMode, GearboxPosition } from './gearbox/gearbox';
+import { GearboxAggressionLevel, GearboxMode, GearboxPosition } from './enums';
 
+export const MAX_RPM = 7000;
+export const MIN_RPM = 500;
+export const RPM_STEP = 500;
+export const RPM_LOSS_ON_ENGINE_BRAKE = 200;
 export const REFRESH_STATE_INTERVAL_MS = 500;
 export const GEARBOX_CHARACTERISTICS = {
   [GearboxMode.Eco]: {
@@ -48,12 +52,17 @@ export const GEARBOX_CHARACTERISTICS = {
     }
   }
 };
+export const AGGRESSION_MULTIPLIER_MAP = {
+  [GearboxMode.Eco]: 1,
+  [GearboxMode.Comfort]: 1,
+  [GearboxMode.Sport]: {
+    [GearboxAggressionLevel.Low]: 1,
+    [GearboxAggressionLevel.Medium]: 1.3,
+    [GearboxAggressionLevel.High]: 1.3,
+  }
+};
 export const GEARBOX_GEAR_SYMBOL_MAP = {
   [GearboxPosition.Parking]: 'P',
   [GearboxPosition.Reverse]: 'R',
   [GearboxPosition.Neutral]: 'N'
 };
-export const MAX_RPM = 7000;
-export const MIN_RPM = 500;
-export const RPM_STEP = 500;
-export const RPM_LOSS_ON_ENGINE_BRAKE = 200;
