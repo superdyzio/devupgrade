@@ -14,12 +14,12 @@ import { GearboxAggressionLevel, GearboxMode, GearboxPosition } from '../enums';
   providedIn: 'root'
 })
 export class CarService {
-  public dashboardData$: Observable<[GearboxStatus, number]> = this.gearbox.gearboxStatus$
+  public dashboardData$: Observable<[GearboxStatus, number]> = this.gearboxDriver.gearboxStatus$
     .pipe(withLatestFrom(this.engine.currentRpm$));
 
   constructor(
     private engine: EngineService,
-    private gearbox: GearboxService,
+    private gearboxDriver: GearboxService,
     private leftPaddle: LeftPaddleService,
     private rightPaddle: RightPaddleService,
     private pedals: PedalsService
@@ -27,43 +27,43 @@ export class CarService {
   }
 
   public setPositionToParking(): void {
-    this.gearbox.handleGearboxPositionChange(GearboxPosition.Parking);
+    this.gearboxDriver.handleGearboxPositionChange(GearboxPosition.Parking);
   }
 
   public setPositionToNeutral(): void {
-    this.gearbox.handleGearboxPositionChange(GearboxPosition.Neutral);
+    this.gearboxDriver.handleGearboxPositionChange(GearboxPosition.Neutral);
   }
 
   public setPositionToReverse(): void {
-    this.gearbox.handleGearboxPositionChange(GearboxPosition.Reverse);
+    this.gearboxDriver.handleGearboxPositionChange(GearboxPosition.Reverse);
   }
 
   public setPositionToDrive(): void {
-    this.gearbox.handleGearboxPositionChange(GearboxPosition.Drive);
+    this.gearboxDriver.handleGearboxPositionChange(GearboxPosition.Drive);
   }
 
   public setModeToEco(): void {
-    this.gearbox.handleGearboxModeChange(GearboxMode.Eco);
+    this.gearboxDriver.handleGearboxModeChange(GearboxMode.Eco);
   }
 
   public setModeToComfort(): void {
-    this.gearbox.handleGearboxModeChange(GearboxMode.Comfort);
+    this.gearboxDriver.handleGearboxModeChange(GearboxMode.Comfort);
   }
 
   public setModeToSport(): void {
-    this.gearbox.handleGearboxModeChange(GearboxMode.Sport);
+    this.gearboxDriver.handleGearboxModeChange(GearboxMode.Sport);
   }
 
   public setAggressionLevelToLow(): void {
-    this.gearbox.handleGearboxAggressionLevelChange(GearboxAggressionLevel.Low);
+    this.gearboxDriver.handleGearboxAggressionLevelChange(GearboxAggressionLevel.Low);
   }
 
   public setAggressionLevelToMedium(): void {
-    this.gearbox.handleGearboxAggressionLevelChange(GearboxAggressionLevel.Medium);
+    this.gearboxDriver.handleGearboxAggressionLevelChange(GearboxAggressionLevel.Medium);
   }
 
   public setAggressionLevelToHigh(): void {
-    this.gearbox.handleGearboxAggressionLevelChange(GearboxAggressionLevel.High);
+    this.gearboxDriver.handleGearboxAggressionLevelChange(GearboxAggressionLevel.High);
   }
 
   public pushLeftPaddle(): void {

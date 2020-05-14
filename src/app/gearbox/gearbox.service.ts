@@ -16,7 +16,7 @@ export class GearboxService implements OnDestroy {
   public gearboxStatus$: Observable<GearboxStatus>;
   private gearboxStatusSubject: BehaviorSubject<GearboxStatus>;
   private gearbox: Gearbox;
-  private gearboxDriver: Subscription;
+  private pedalsStateSubscription: Subscription;
   private isKickdown: boolean;
   private kickdownDecreaseCounter: number = null;
 
@@ -34,7 +34,7 @@ export class GearboxService implements OnDestroy {
     });
     this.gearboxStatus$ = this.gearboxStatusSubject.asObservable();
 
-    this.gearboxDriver = this.pedals.pedalsState$
+    this.pedalsStateSubscription = this.pedals.pedalsState$
       .pipe(
         tap(() => {
           // TODO move to method
@@ -73,7 +73,7 @@ export class GearboxService implements OnDestroy {
   }
 
   public ngOnDestroy() {
-    this.gearboxDriver.unsubscribe();
+    this.pedalsStateSubscription.unsubscribe();
   }
 
   public handleGearboxPositionChange(gearboxPosition: GearboxPosition): void {
