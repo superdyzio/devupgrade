@@ -110,7 +110,7 @@ export class GearboxService implements OnDestroy {
       if (this.gearbox.decreaseGear()) {
         this.engine.handleGearDecreased();
       } else {
-        this.engine.engineBreak();
+        this.engine.engineBrake();
       }
     }
   }

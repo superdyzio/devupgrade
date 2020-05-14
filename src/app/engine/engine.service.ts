@@ -25,7 +25,7 @@ export class EngineService implements OnDestroy {
         } else if (pedalsState < 0) {
           this.decelerate(pedalsState);
         } else {
-          this.engineBreak();
+          this.engineBrake();
         }
       });
   }
@@ -59,7 +59,7 @@ export class EngineService implements OnDestroy {
     );
   }
 
-  public engineBreak(): void {
+  public engineBrake(): void {
     if (this.currentRpm - RPM_LOSS_ON_ENGINE_BRAKE >= MIN_RPM) {
       this.setCurrentRpm(this.currentRpm - RPM_LOSS_ON_ENGINE_BRAKE);
     } else {
