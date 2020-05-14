@@ -7,7 +7,7 @@ import { BehaviorSubject } from 'rxjs';
 import { GearboxAggressionLevel, GearboxMode, GearboxPosition } from '../enums';
 
 // tslint:disable:no-string-literal
-fdescribe('GearboxService', () => {
+describe('GearboxService', () => {
   const engineCurrentRpmSubject: BehaviorSubject<number> = new BehaviorSubject<number>(0);
   const pedalStateSubject: BehaviorSubject<number> = new BehaviorSubject<number>(0);
   let service: GearboxService;

@@ -16,10 +16,10 @@ describe('AppComponent', () => {
     expect(app).toBeTruthy();
   });
 
-  xit('should render title', () => {
+  it('should render dashboard component', () => {
     const fixture = TestBed.createComponent(AppComponent);
     fixture.detectChanges();
     const compiled = fixture.nativeElement;
-    expect(compiled.querySelector('.content span').textContent).toContain('devupgrade app is running!');
+    expect(compiled.querySelector('app-dashboard')).toBeTruthy();
   });
 });
