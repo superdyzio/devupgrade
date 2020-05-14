@@ -5,6 +5,8 @@ export interface GearboxStatus {
   mode: GearboxMode;
   aggressionLevel: GearboxAggressionLevel;
   currentGear: number;
+  allowManualGearChange: boolean;
+  allowAggressionLevelChange: boolean;
 }
 
 export interface GearboxKickdownCharacteristics {

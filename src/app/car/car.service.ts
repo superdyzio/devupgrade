@@ -9,6 +9,7 @@ import { EngineService } from '../engine/engine.service';
 import { PedalsService } from '../pedals/pedals.service';
 import { GearboxStatus } from '../interfaces';
 import { GearboxAggressionLevel, GearboxMode, GearboxPosition } from '../enums';
+import { MIN_RPM } from '../constants';
 
 @Injectable({
   providedIn: 'root'
@@ -24,6 +25,15 @@ export class CarService {
     private rightPaddle: RightPaddleService,
     private pedals: PedalsService
   ) {
+  }
+
+  public isCarStopped(): boolean {
+    const gearboxStatus = this.gearboxDriver.gearboxStatus;
+    const rpm = this.engine.currentRpm;
+
+    return gearboxStatus.position === GearboxPosition.Parking
+      || gearboxStatus.position === GearboxPosition.Neutral && rpm === MIN_RPM
+      || ((gearboxStatus.currentGear === 1 || gearboxStatus.position === GearboxPosition.Reverse) && rpm === MIN_RPM);
   }
 
   public setPositionToParking(): void {

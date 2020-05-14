@@ -4,11 +4,10 @@ import { GearboxService } from './gearbox.service';
 import { EngineService } from '../engine/engine.service';
 import { PedalsService } from '../pedals/pedals.service';
 import { BehaviorSubject } from 'rxjs';
-import { take, tap } from 'rxjs/operators';
-import { GearboxPosition } from './gearbox';
+import { GearboxAggressionLevel, GearboxMode, GearboxPosition } from '../enums';
 
 // tslint:disable:no-string-literal
-describe('GearboxService', () => {
+fdescribe('GearboxService', () => {
   const engineCurrentRpmSubject: BehaviorSubject<number> = new BehaviorSubject<number>(0);
   const pedalStateSubject: BehaviorSubject<number> = new BehaviorSubject<number>(0);
   let service: GearboxService;
@@ -25,7 +24,7 @@ describe('GearboxService', () => {
     };
     pedalsMock = {
       ...jasmine.createSpyObj('PedalsService', ['arePedalsReleased']),
-      pedalState$: pedalStateSubject.asObservable()
+      pedalsState$: pedalStateSubject.asObservable()
     };
 
     TestBed.configureTestingModule({
@@ -42,31 +41,198 @@ describe('GearboxService', () => {
     expect(service).toBeTruthy();
   });
 
-  xdescribe('eco mode', () => {
 
-    it('should', done => {
-      // arrange
-      // mocki, definiowanie co ma być zwrócone itp.
-      pedalsMock.arePedalsReleased.and.returnValue(true);
-      const isPositionDriveSpy = spyOn(service['gearbox'], 'isPositionDrive');
-      isPositionDriveSpy.and.returnValue(true);
-      // @ts-ignore
-      spyOn(service, 'setKickdownFlags');
-      service['kickdownDecreaseCounter'] = 2;
+  describe('handleGearboxPositionChange', () => {
+    it('should call gearbox.setGearboxPosition with parameters', () => {
+      const spy = spyOn(service['gearbox'], 'setGearboxPosition');
 
-      // act
-      // akcje
+      service.handleGearboxPositionChange(GearboxPosition.Neutral);
 
-      pedalsMock.pedalState$.pipe(take(1)).subscribe(() => {
-        console.log('duoa');
-        expect(service['setKickdownFlags']).toHaveBeenCalledTimes(1);
-        expect(service['setKickdownFlags']).toHaveBeenCalledWith(0.5);
-        done();
-      });
-      pedalStateSubject.next(0.5);
-
-      // assert
-      // sprawdzenia (zarówno liczba jak i argumenty wywołań)
+      expect(spy).toHaveBeenCalledWith(GearboxPosition.Neutral);
     });
   });
+
+  describe('handleGearboxModeChange', () => {
+    it('should call gearbox.setGearboxMode with parameters', () => {
+      const spy = spyOn(service['gearbox'], 'setGearboxMode');
+
+      service.handleGearboxModeChange(GearboxMode.Sport);
+
+      expect(spy).toHaveBeenCalledWith(GearboxMode.Sport);
+    });
+  });
+
+  describe('handleGearboxAggressionLevelChange', () => {
+    it('should call gearbox.setGearboxAggressionLevel with parameters', () => {
+      const spy = spyOn(service['gearbox'], 'setGearboxAggressionLevel');
+
+      service.handleGearboxAggressionLevelChange(GearboxAggressionLevel.High);
+
+      expect(spy).toHaveBeenCalledWith(GearboxAggressionLevel.High);
+    });
+  });
+
+  describe('increaseGearManually', () => {
+
+    it('should call engine.handleGearIncreased', () => {
+      service['gearbox'].position = GearboxPosition.Drive;
+      service['gearbox'].currentGear = 2;
+
+      service.increaseGearManually();
+
+      expect(engineMock.handleGearIncreased).toHaveBeenCalled();
+    });
+
+    it('should not call engine.handleGearIncreased if gear is max', () => {
+      service['gearbox'].position = GearboxPosition.Drive;
+      service['gearbox'].currentGear = service['gearbox'].maxGear;
+
+      service.increaseGearManually();
+
+      expect(engineMock.handleGearIncreased).not.toHaveBeenCalled();
+    });
+
+    it('should not call engine.handleGearIncreased if position is not DRIVE', () => {
+      service['gearbox'].position = GearboxPosition.Parking;
+
+      service.increaseGearManually();
+
+      expect(engineMock.handleGearIncreased).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('decreaseGearManually', () => {
+
+    it('should call engine.handleGearDecreased', () => {
+      service['gearbox'].position = GearboxPosition.Drive;
+      service['gearbox'].currentGear = 2;
+
+      service.decreaseGearManually();
+
+      expect(engineMock.handleGearDecreased).toHaveBeenCalled();
+    });
+
+    it('should not call engine.handleGearDecreased if gear is 1', () => {
+      service['gearbox'].position = GearboxPosition.Drive;
+      service['gearbox'].currentGear = 1;
+
+      service.decreaseGearManually();
+
+      expect(engineMock.handleGearDecreased).not.toHaveBeenCalled();
+    });
+
+    it('should not call engine.handleGearDecreased if position is not DRIVE', () => {
+      service['gearbox'].position = GearboxPosition.Reverse;
+
+      service.decreaseGearManually();
+
+      expect(engineMock.handleGearDecreased).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('setKickdownFlags', () => {
+
+    it('should set isKickdown to false if Eco', () => {
+      service['gearbox'].mode = GearboxMode.Eco;
+
+      service['setKickdownFlags'](1);
+
+      expect(service['isKickdown']).toBe(false);
+    });
+
+    it('should set isKickdown to false if Comfort and if not kickdown', () => {
+      service['gearbox'].mode = GearboxMode.Comfort;
+
+      service['setKickdownFlags'](0.4);
+
+      expect(service['isKickdown']).toBe(false);
+    });
+
+    it('should set isKickdown to true if Comfort and if kickdown', () => {
+      service['gearbox'].mode = GearboxMode.Comfort;
+
+      service['setKickdownFlags'](0.6);
+
+      expect(service['isKickdown']).toBe(true);
+    });
+
+    it('should set isKickdown to false if Sport and if not kickdown', () => {
+      service['gearbox'].mode = GearboxMode.Sport;
+
+      service['setKickdownFlags'](0.4);
+
+      expect(service['isKickdown']).toBe(false);
+    });
+
+    it('should set isKickdown to true if Sport and if 1st level kickdown', () => {
+      service['gearbox'].mode = GearboxMode.Sport;
+
+      service['setKickdownFlags'](0.6);
+
+      expect(service['isKickdown']).toBe(true);
+    });
+
+
+    it('should set isKickdown to true if Sport and if 2nd level kickdown', () => {
+      service['gearbox'].mode = GearboxMode.Sport;
+
+      service['setKickdownFlags'](0.9);
+
+      expect(service['isKickdown']).toBe(true);
+    });
+
+    it('should set kickdownDecreaseCounter to 1 if Comfort and if kickdown', () => {
+      service['gearbox'].mode = GearboxMode.Comfort;
+
+      service['setKickdownFlags'](0.6);
+
+      expect(service['kickdownDecreaseCounter']).toBe(1);
+    });
+
+    it('should set kickdownDecreaseCounter to 1 if Sport and if 1st level kickdown', () => {
+      service['gearbox'].mode = GearboxMode.Sport;
+
+      service['setKickdownFlags'](0.6);
+
+      expect(service['kickdownDecreaseCounter']).toBe(1);
+    });
+
+    it('should set kickdownDecreaseCounter to 2 if Sport and if 2nd level kickdown', () => {
+      service['gearbox'].mode = GearboxMode.Sport;
+
+      service['setKickdownFlags'](0.9);
+
+      expect(service['kickdownDecreaseCounter']).toBe(2);
+    });
+
+  });
+
+  // describe('eco mode', () => {
+  //
+  //   it('should', done => {
+  //     // arrange
+  //     // mocki, definiowanie co ma być zwrócone itp.
+  //     pedalsMock.arePedalsReleased.and.returnValue(true);
+  //     const isPositionDriveSpy = spyOn(service['gearbox'], 'isPositionDrive');
+  //     isPositionDriveSpy.and.returnValue(true);
+  //     // @ts-ignore
+  //     spyOn(service, 'setKickdownFlags');
+  //     service['kickdownDecreaseCounter'] = 2;
+  //
+  //     // act
+  //     // akcje
+  //
+  //     pedalsMock.pedalState$.pipe(take(1)).subscribe(() => {
+  //       console.log('duoa');
+  //       expect(service['setKickdownFlags']).toHaveBeenCalledTimes(1);
+  //       expect(service['setKickdownFlags']).toHaveBeenCalledWith(0.5);
+  //       done();
+  //     });
+  //     pedalStateSubject.next(0.5);
+  //
+  //     // assert
+  //
+  //     // sprawdzenia (zarówno liczba jak i argumenty wywołań)
+  //   });
+  // });
 });

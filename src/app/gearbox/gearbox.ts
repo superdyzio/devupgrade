@@ -15,7 +15,7 @@ export class Gearbox {
   }
 
   public getIncreaseGearRpmLevel(): number {
-    return this.characteristics[this.mode].throttle.increaseGearRpmLevel;
+    return this.characteristics[this.mode].throttle.increaseGearRpmLevel * this.getAggressionMultiplier();
   }
 
   public getDecreaseGearRpmLevel(isBraking: boolean = false): number {
@@ -64,7 +64,6 @@ export class Gearbox {
     pedalsState: number,
     kickdownCharacteristics: GearboxKickdownCharacteristics = this.characteristics[this.mode].throttle.nextLevelKickdown
   ): number {
-    // TODO multiplier for throttle on sport
     return kickdownCharacteristics.maxThrottleLevel && pedalsState >= kickdownCharacteristics.maxThrottleLevel
       ? this.getKickdownDecreaseGearMaxRpmLevel(pedalsState, kickdownCharacteristics.nextLevelKickdown)
       : kickdownCharacteristics.decreaseGearMaxRpmLevel * this.getAggressionMultiplier();

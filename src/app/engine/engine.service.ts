@@ -9,8 +9,8 @@ import { MAX_RPM, MIN_RPM, RPM_LOSS_ON_ENGINE_BRAKE, RPM_STEP } from '../constan
 })
 export class EngineService implements OnDestroy {
   private isWorking = false;
-  private currentRpmSubject: BehaviorSubject<number> = new BehaviorSubject<number>(0);
   private pedalsStateSubscription: Subscription;
+  private currentRpmSubject: BehaviorSubject<number> = new BehaviorSubject<number>(0);
   public currentRpm$: Observable<number> = this.currentRpmSubject.asObservable();
 
   constructor(private pedals: PedalsService) {
@@ -34,6 +34,10 @@ export class EngineService implements OnDestroy {
     this.pedalsStateSubscription.unsubscribe();
   }
 
+  public get currentRpm(): number {
+    return this.currentRpmSubject.value;
+  }
+
   public turnOn(): void {
     this.setCurrentRpm(MIN_RPM);
     this.isWorking = true;
@@ -42,21 +46,6 @@ export class EngineService implements OnDestroy {
   public turnOff(): void {
     this.setCurrentRpm(0);
     this.isWorking = false;
-  }
-
-  private accelerate(throttleLevel: number): void {
-    this.setCurrentRpm(
-      Math.min(
-        Math.max(this.currentRpm + throttleLevel * RPM_STEP, MIN_RPM),
-        MAX_RPM
-      )
-    );
-  }
-
-  private decelerate(brakeLevel: number): void {
-    this.setCurrentRpm(
-      Math.max(this.currentRpm - Math.abs(brakeLevel) * RPM_STEP, MIN_RPM)
-    );
   }
 
   public engineBreak(): void {
@@ -75,8 +64,19 @@ export class EngineService implements OnDestroy {
     this.setCurrentRpm(Math.floor(this.currentRpm + this.currentRpm * .3));
   }
 
-  private get currentRpm(): number {
-    return this.currentRpmSubject.value;
+  private accelerate(throttleLevel: number): void {
+    this.setCurrentRpm(
+      Math.min(
+        Math.max(this.currentRpm + throttleLevel * RPM_STEP, MIN_RPM),
+        MAX_RPM
+      )
+    );
+  }
+
+  private decelerate(brakeLevel: number): void {
+    this.setCurrentRpm(
+      Math.max(this.currentRpm - Math.abs(brakeLevel) * RPM_STEP, MIN_RPM)
+    );
   }
 
   private setCurrentRpm(rpm: number): void {

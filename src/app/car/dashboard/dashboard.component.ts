@@ -3,9 +3,9 @@ import * as go from 'gojs';
 import { Subscription } from 'rxjs';
 
 import { CarService } from '../car.service';
-import { GEARBOX_GEAR_SYMBOL_MAP, MIN_RPM } from '../../constants';
+import { GEARBOX_GEAR_SYMBOL_MAP } from '../../constants';
 import { filter } from 'rxjs/operators';
-import { GearboxAggressionLevel, GearboxMode, GearboxPosition } from '../../enums';
+import { GearboxAggressionLevel } from '../../enums';
 import { GearboxStatus } from '../../interfaces';
 
 let diagram: go.Diagram;
@@ -18,14 +18,12 @@ let diagram: go.Diagram;
 })
 export class DashboardComponent implements OnDestroy, AfterContentInit {
   public nodes = [{key: 'RPM', value: 0}];
-  public dashboardDataSubscription: Subscription;
   public rpm: number;
   public gear: number | string;
-  public isStopped: boolean;
+  public isCarStopped: boolean;
   public allowManualGearChange: boolean;
   public allowAggressionLevelChange: boolean;
   public showFire: boolean;
-  private previousGear: number;
   public options = {
     floor: -1,
     ceil: 1,
@@ -34,6 +32,9 @@ export class DashboardComponent implements OnDestroy, AfterContentInit {
   };
   public value = 0;
 
+  private dashboardDataSubscription: Subscription;
+  private previousGear: number;
+
   constructor(public car: CarService) {
   }
 
@@ -41,50 +42,14 @@ export class DashboardComponent implements OnDestroy, AfterContentInit {
     this.dashboardDataSubscription = this.car.dashboardData$
       .pipe(filter(() => !!diagram))
       .subscribe(([gearboxStatus, rpm]: [GearboxStatus, number]) => {
-        this.rpm = rpm;
-        this.previousGear = typeof this.gear === 'number' ? this.gear : 0;
-        this.gear = GEARBOX_GEAR_SYMBOL_MAP[gearboxStatus.position] || gearboxStatus.currentGear;
-        if (
-          // TODO optimize
-          !this.showFire
-          && gearboxStatus.aggressionLevel === GearboxAggressionLevel.High
-          && !!this.previousGear
-          && !!gearboxStatus.currentGear
-          && this.previousGear === gearboxStatus.currentGear - 1
-        ) {
-          this.shootFire();
-        }
-
-        // todo move to gerboxStatus
-        this.allowManualGearChange = gearboxStatus.position === GearboxPosition.Drive;
-        this.allowAggressionLevelChange = gearboxStatus.mode === GearboxMode.Sport;
-
-        // todo: move to car service method
-        this.isStopped = gearboxStatus.position === GearboxPosition.Neutral && rpm === MIN_RPM
-          || gearboxStatus.position === GearboxPosition.Parking
-          || ((gearboxStatus.currentGear === 1 || gearboxStatus.position === GearboxPosition.Reverse) && rpm === MIN_RPM);
-
-        diagram.startTransaction();
-        diagram.nodes.each(node => {
-          const scale: any = node.findObject('SCALE');
-          if (scale === null || scale.type !== go.Panel.Graduated) {
-            return;
-          }
-          diagram.model.setDataProperty(node.data, 'value', rpm);
-        });
-        diagram.commitTransaction();
+        this.setVariables(rpm, gearboxStatus);
+        this.handleFire(gearboxStatus);
+        this.handleDiagramChange(rpm);
       });
   }
 
   public ngOnDestroy() {
     this.dashboardDataSubscription.unsubscribe();
-  }
-
-  private shootFire(): void {
-    this.showFire = true;
-    setTimeout(() => {
-      this.showFire = false;
-    }, 750);
   }
 
   public initDiagram(): go.Diagram {
@@ -162,5 +127,44 @@ export class DashboardComponent implements OnDestroy, AfterContentInit {
     );
 
     return diagram;
+  }
+
+  private setVariables(rpm: number, gearboxStatus: GearboxStatus) {
+    this.rpm = rpm;
+    this.gear = GEARBOX_GEAR_SYMBOL_MAP[gearboxStatus.position] || gearboxStatus.currentGear;
+    this.allowManualGearChange = gearboxStatus.allowManualGearChange;
+    this.allowAggressionLevelChange = gearboxStatus.allowAggressionLevelChange;
+    this.isCarStopped = this.car.isCarStopped();
+  }
+
+  private handleFire(gearboxStatus: GearboxStatus) {
+    if (this.shouldShootFire(gearboxStatus)) {
+      this.shootFire();
+    }
+    this.previousGear = gearboxStatus.currentGear;
+  }
+
+  private handleDiagramChange(rpm: number) {
+    diagram.startTransaction();
+    diagram.nodes.each(node => {
+      const scale: any = node.findObject('SCALE');
+      if (scale === null || scale.type !== go.Panel.Graduated) {
+        return;
+      }
+      diagram.model.setDataProperty(node.data, 'value', rpm);
+    });
+    diagram.commitTransaction();
+  }
+
+  private shouldShootFire(gearboxStatus: GearboxStatus) {
+    return gearboxStatus.aggressionLevel === GearboxAggressionLevel.High
+      && this.previousGear && this.previousGear + 1 === gearboxStatus.currentGear;
+  }
+
+  private shootFire(): void {
+    this.showFire = true;
+    setTimeout(() => {
+      this.showFire = false;
+    }, 750);
   }
 }
