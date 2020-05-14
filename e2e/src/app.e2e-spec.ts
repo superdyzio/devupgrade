@@ -1,14 +1,18 @@
-import { browser, by, element, logging } from 'protractor';
+import { browser, logging } from 'protractor';
 
 import { AppPage } from './app.po';
-import { GearboxPosition } from '../../src/app/gearbox/gearbox';
+import { GearboxAggressionLevel, GearboxMode, GearboxPosition } from '../../src/app/gearbox/gearbox';
 
 describe('workspace-project App', () => {
+  const rpmGaugeTag = 'gojs-diagram';
+  const sliderTag = 'ng5-slider';
+  const gearUpButtonContent = 'Gear Up';
+  const gearDownButtonContent = 'Gear Down';
   let page: AppPage;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     page = new AppPage();
-    page.navigateTo();
+    await page.navigateTo();
   });
 
   afterEach(async () => {
@@ -18,36 +22,21 @@ describe('workspace-project App', () => {
     } as logging.Entry));
   });
 
-  describe('Eco mode', () => {
-    fit('should be able to achieve full speed and then fully brake', () => {
-      browser.sleep(250);
-      page.getPositionRadioButton(GearboxPosition.Reverse).click();
+  it('should contain all important elements', () => {
+    expect(page.getPositionRadioButton(GearboxPosition.Drive).getAttribute('checked')).toBeNull();
+    expect(page.getPositionRadioButton(GearboxPosition.Parking).getAttribute('checked')).toEqual('true');
+    expect(page.getPositionRadioButton(GearboxPosition.Neutral).getAttribute('checked')).toBeNull();
+    expect(page.getPositionRadioButton(GearboxPosition.Reverse).getAttribute('checked')).toBeNull();
 
-      browser.sleep(250);
+    expect(page.getModeRadioButton(GearboxMode.Eco).getAttribute('checked')).toBeNull();
+    expect(page.getModeRadioButton(GearboxMode.Comfort).getAttribute('checked')).toEqual('true');
+    expect(page.getModeRadioButton(GearboxMode.Sport).getAttribute('checked')).toBeNull();
 
-      expect(page.getPositionRadioButton(GearboxPosition.Reverse).getAttribute('checked')).toEqual('true');
-    });
+    expect(page.getAggressionLevelRadioButton(GearboxAggressionLevel.Low).getAttribute('checked')).toEqual('true');
+    expect(page.getAggressionLevelRadioButton(GearboxAggressionLevel.Medium).getAttribute('checked')).toBeNull();
+    expect(page.getAggressionLevelRadioButton(GearboxAggressionLevel.High).getAttribute('checked')).toBeNull();
 
-    it('should be able to manually change gears', () => {
-    });
-  });
-
-  describe('Comfort mode', () => {
-    it('should start on Parking position and Comfort mode with lowest aggression level and no trailer', () => {
-    });
-
-    it('should reduce gear during kickdown on Comfort mode', () => {
-    });
-  });
-
-  describe('Sport mode', () => {
-    it('should reduce gear twice during kickdown on Sport mode', () => {
-    });
-
-    it('should have higher gear change threshold on medium aggression level', () => {
-    });
-
-    it('should shoot fire from exhaust on gear increase while on highest aggression level', () => {
-    });
+    expect(page.getRpmGaugeTag()).toEqual(rpmGaugeTag);
+    expect(page.getSliderTag()).toEqual(sliderTag);
   });
 });
