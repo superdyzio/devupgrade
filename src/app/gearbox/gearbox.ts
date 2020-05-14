@@ -2,7 +2,6 @@ import { AGGRESSION_MULTIPLIER_MAP } from '../constants';
 import { GearboxAggressionLevel, GearboxMode, GearboxPosition } from '../enums';
 import { GearboxCharacteristics, GearboxKickdownCharacteristics, GearboxThrottleCharacteristics } from '../interfaces';
 
-
 export class Gearbox {
   public constructor(
     public maxGear: number,
