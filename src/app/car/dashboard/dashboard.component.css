@@ -1,0 +1,132 @@
+div.dashboard {
+  height: 100%;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 20% 60% 20%;
+  grid-template-rows: 25% 60% 15%;
+  grid-template-areas: 'controls controls controls' 'leftFire gauges rightFire' 'footer footer footer';
+}
+
+#controls {
+  grid-area: controls;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  padding: 60px 20px;
+}
+
+#controls div {
+  width: 15%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+}
+
+#controls div button {
+  display: block;
+  height: 40%;
+  width: 90%;
+  margin: 5%;
+  cursor: pointer;
+}
+
+#controls div button[disabled] {
+  cursor: default;
+  background: rgb(170, 170, 170);
+}
+
+#controls div label {
+  display: block;
+  margin: 8px;
+}
+
+#controls div label input {
+  margin: 4px;
+}
+
+#leftFire {
+  grid-area: leftFire;
+}
+
+#rightFire {
+  grid-area: rightFire;
+}
+
+.fire {
+  height: 200px;
+  width: 150px;
+  display: flex;
+  flex-direction: column-reverse;
+  text-align: center;
+  padding: 20% 10%;
+  font-size: 36px;
+  color: darkred;
+}
+
+.fire.shoot {
+  background: url("src/assets/fire.png") no-repeat;
+  background-size: 100% 100%;
+}
+
+#gauges {
+  grid-area: gauges;
+  display: flex;
+  flex-direction: row;
+}
+
+#gauges .diagramDivClass {
+  width: 400px;
+  height: 100%;
+}
+
+#gauges .gauges-readings {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+}
+
+#gauges .gauges-readings div {
+  width: 90%;
+  height: 40%;
+  font-size: 72px;
+  text-align: center;
+}
+
+#gauges .gauges-readings div b {
+  color: lightgray;
+}
+
+#footer {
+  grid-area: footer;
+  background: gray;
+}
+
+#footer ng5-slider {
+  width: 90%;
+  margin: 5%;
+}
+
+#footer .ng5-slider .ng5-slider-bar {
+  background: rgb(255,0,0);
+  background: linear-gradient(90deg, rgba(255,0,0,1) 0%, rgba(180,120,100,1) 50%, rgba(0,255,0,1) 100%);
+  height: 20px;
+}
+
+#footer .ng5-slider .ng5-slider-pointer {
+  width: 50px;
+  height: 50px;
+  top: -15px;
+  background-color: #333;
+  border-radius: 50%;
+}
+
+#footer .ng5-slider .ng5-slider-pointer:after {
+  display: none;
+}
+
+#footer .ng5-slider .ng5-slider-bubble {
+  color: black;
+  font-weight: bold;
+}
